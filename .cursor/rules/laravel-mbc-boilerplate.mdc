@@ -1,0 +1,40 @@
+---
+description: Laravel MBC monolith backend — architecture and conventions (tracks backend_boiler_platte.md)
+alwaysApply: true
+---
+
+# Laravel admin / API (MBC boilerplate)
+
+**Canonical full spec:** `backend_boiler_platte.md` (read it for Docker snippets, JSON shapes, security details, and the AI prompt template). This rule is a **tracked summary**; if the doc and this file disagree, **prefer `backend_boiler_platte.md`**.
+
+## Non-negotiables
+
+- **Architecture:** MBC-style **module isolation** — domain folders under `app/Http/Controllers/{Domain}/`, matching `routes/{domain}Routes.php`, views under `resources/views/backend/...`.
+- **Layers:** Thin **Controller** → **Service** (orchestration) + **Action** (single task) → **Model**; Blade for admin UI.
+- **HTTP:** **Axios-first** dynamic behavior; CSRF on mutating verbs. Prefer **dual route**: Blade `index` + JSON list/analytics endpoint (or same route branching on `expectsJson()` / `ajax()` — match existing module).
+- **JSON:** Stable shapes for tables; docs use `{ success, data, meta }` / paginator conventions — **match whichever pattern the touching module already uses**.
+- **Admin UI:** **Bootstrap only** (no Tailwind / heavy UI libs in dashboard); minimal custom style via **LESS**; assets only under **`public/assets/dashboard/`** (css, js, plugins, images, fonts); **no CDN plugins**; **no inline JS/CSS**.
+- **Media:** Use Laravel disks (`public`, `s3`, `ftp`); production media → **FTP when configured**; URLs via **`get_file_url()`** + stored relative `path`; client-side image edit (crop/resize/rotate/zoom) before upload; server: **Intervention Image**, then upload + DB tracking (usage, module refs).
+
+## Lists and forms
+
+- Every list page: **search, pagination, sorting, column visibility, export** (via Axios JSON).
+- **One** reusable Blade form partial for create + update (`id` null vs present).
+
+## Security & quality
+
+- Route groups: **`auth`**, and where applicable **`CheckUserType`**, **`DemoMode`** — do not invent a parallel permission system.
+- No business logic in **routes** or fat controllers; no logic duplication — shared bits → Service/Action.
+- DB: relations in models; migrations without heavy joins; columns documented (comment/meaning).
+- Performance: service worker + short API cache (e.g. 5s) + `APP_VERSION` cache busting per boilerplate.
+
+## Relation to SRS (`talimul-quran-srs.mdc`)
+
+- **Laravel admin / dashboard / internal tools:** follow **this boilerplate** (Bootstrap + Blade + Axios).
+- **Public marketing site** (talimiboard-style): SRS may use **Tailwind / Vue** or static pages — keep stack split explicit per area.
+
+## New feature workflow (for agents)
+
+1. Locate module folder + `routes/*Routes.php` + existing Blade/JSON patterns.  
+2. Add thin controller methods, Service/Action as needed, stable naming across layers.  
+3. Keep list pages on the **view + JSON** contract; validate input; avoid N+1; use transactions for multi-step writes.

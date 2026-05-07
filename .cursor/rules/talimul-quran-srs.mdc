@@ -1,0 +1,78 @@
+---
+description: Talimul Quran Management System — SRS summary for AI-assisted development
+alwaysApply: true
+---
+
+# Talimul Quran Management System (SRS)
+
+**Bangla name:** তালিমুল কুরআন ম্যানেজমেন্ট সিস্টেম  
+**Design reference:** https://talimiboard.org — clean layout, Islamic visual theme (see also `srs.txt` for full Bangla spec).
+
+## Product goal
+
+Deliver correct Qur’an education and Arabic grammar instruction, with teacher training, maktab management, and publication sales on one platform.
+
+## User roles (RBAC)
+
+| Role | Scope |
+|------|--------|
+| Super admin | Full system control |
+| Central ustad / master trainer | Panel teachers, regional teachers, central Zoom-based online courses |
+| Muallim/Muallima (regional teacher) | Local courses, attendance, reports |
+| Student | Enrollment, fees, exams, certificate download |
+| General visitor | Site content, videos, book purchase, donations |
+| Member (সদস্য) | Defined duties; pays fixed membership/chanda |
+
+## Four course types (Module 2)
+
+1. Talimul Quran — illiterate children  
+2. Talimul Quran — illiterate adults  
+3. Sahih Talimul Quran — knows but not correct  
+4. Talimul Salat — adults 60+ with minimal prior knowledge  
+
+**Business rules:** Fee **500 BDT** per course; minimum **30 students** per class. Offline: region → district → thana, assigned ustad + central ustad. Online: Zoom link from center to a fixed cohort.
+
+## Core modules (build toward)
+
+1. **Website / public frontend** — Home (mission, active courses, annual program highlights, video section); curriculum page + PDF download; publication catalog (cover, price, order).  
+2. **Course management** — Types above, fees, online/offline scheduling.  
+3. **Class & reporting (teachers)** — Daily attendance; web reports + print.  
+4. **Teacher creation & training** — Target: **87 cities**, **87 male + 87 female** teachers; **66 male + 55 female** panel trainer dashboards; **90-day** batch flow: 10 students, 500 BDT, **300-mark** exam, admission papers, certificate + authority signature upload, proof print, courier tracking. **Hierarchy:** master trainer → muallim/muallima → selected muallim/muallima.  
+5. **Pilot maktab** — ~**50** ideal maktabs; committee management; teacher assignment (from center or salaried); progress reports to center.  
+6. **Forms** — Registration, guideline, foundation, income-expense receipt (linked to accounting).  
+7. **Video library** — YouTube embeds; **free for all**.  
+8. **Inventory & finance** — Publication stock; income/expense dashboard; receipt generation.  
+9. **Applications & donations** — Become muallim; training application (region/district/thana, course type, online/offline); donation (bKash/Nagad/bank) with auto receipt.  
+10. **Annual calendar** — Muallim conference, general conference, central ustad training, central ustad development program (registration + updates).
+
+## Functional requirements
+
+- **FR-01:** Payment gateway (bKash, Nagad, Rocket, bank transfer) for **500 BDT** fees and book sales.  
+- **FR-02:** Online **300-mark** exam with automatic results.  
+- **FR-03:** Certificate generator with **central ustad digital signature** applied automatically.  
+- **FR-04:** **Zoom API** — class links to students via **email/SMS**.  
+- **FR-05:** Dashboards filterable by **region, district, thana** (e.g. student counts per thana under Dhaka region).  
+- **FR-06:** **Print-friendly PDF** reports.
+
+## Non-functional requirements
+
+- **NFR-01:** With data for all **87** cities loaded, typical page load **under 3 seconds** (optimize queries, assets, caching).  
+- **NFR-02:** **RBAC** — regional teachers **must not** see other regions’ data.  
+- **NFR-03:** Responsive: mobile, tablet, desktop.  
+- **NFR-04:** **Primary UI language: Bangla** (proper fonts); **Arabic** for Qur’an / grammar (correct RTL and fonts).
+
+## Recommended stack (from SRS + project split)
+
+- **Public / marketing site:** HTML5, CSS3, **Tailwind CSS**, JavaScript, **Vue.js** where dynamic (per SRS); design aligned with **talimiboard.org**.  
+- **Admin / backend app:** **Laravel monolith** per **`backend_boiler_platte.md`**: **Bootstrap** admin, **Blade**, **Axios** (not Tailwind for dashboard). See **`.cursor/rules/laravel-mbc-boilerplate.mdc`**.  
+- **Backend API / app server:** **PHP (Laravel)**  
+- **Database:** **MySQL**
+
+When the repo differs (e.g. static HTML only), align new work toward the appropriate stack for that surface unless the team decides otherwise.
+
+## Cursor / implementation hints
+
+- Use **Bangla** labels and content patterns where the SRS specifies; support **Arabic** text rendering.  
+- Enforce **data isolation** per region/district/thana for non-admin teacher roles.  
+- Centralize **500 BDT**, **minimum 30 students per class**, **300 marks**, **90-day training**, **87/87**, **66/55** trainer counts as domain constants or config where applicable.  
+- Prefer designs consistent with **talimiboard.org** (clean, Islamic theme).
