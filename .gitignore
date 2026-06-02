@@ -26,3 +26,4 @@ Thumbs.db
 *.md
 /public/html
 /public/uploads
+*.zip

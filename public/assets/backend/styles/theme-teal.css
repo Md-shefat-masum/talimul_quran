@@ -1,0 +1,120 @@
+/* ========================================================================
+ * Teal Admin Brand Layer
+ * ------------------------------------------------------------------------
+ * This file is intentionally small and framework-friendly. It updates the
+ * existing Bootstrap admin template's primary accents without changing its
+ * component architecture. Future management modules may reuse these tokens.
+ * ====================================================================== */
+:root {
+    --brand-teal-950: #063b3a;
+    --brand-teal-900: #07504e;
+    --brand-teal-800: #07635f;
+    --brand-teal-700: #08766f;
+    --brand-teal-600: #0b8f87;
+    --brand-teal-500: #14a69d;
+    --brand-teal-400: #41bbb3;
+    --brand-teal-300: #83d7d0;
+    --brand-teal-200: #b9e9e4;
+    --brand-teal-100: #daf3f0;
+    --brand-teal-50: #f1fbfa;
+    --brand-ink: #173735;
+    --brand-muted: #68807d;
+    --brand-border: #d8ebe8;
+    --brand-shadow: 0 12px 30px rgba(7, 80, 78, 0.09);
+}
+
+/* Primary helpers from the inherited admin template */
+.bg-gradient-primary,
+.btn-gradient-primary {
+    background: linear-gradient(135deg, var(--brand-teal-700), var(--brand-teal-500)) !important;
+}
+
+.btn-gradient-primary {
+    color: #ffffff !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 8px 18px rgba(8, 118, 111, 0.2);
+}
+
+.btn-gradient-primary:hover,
+.btn-gradient-primary:focus {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, var(--brand-teal-800), var(--brand-teal-600)) !important;
+    box-shadow: 0 10px 22px rgba(8, 118, 111, 0.26);
+}
+
+.btn-primary {
+    color: #ffffff !important;
+    background-color: var(--brand-teal-700) !important;
+    border-color: var(--brand-teal-700) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--brand-teal-800) !important;
+    border-color: var(--brand-teal-800) !important;
+}
+
+.btn-outline-primary {
+    color: var(--brand-teal-700) !important;
+    border-color: var(--brand-teal-500) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #ffffff !important;
+    background-color: var(--brand-teal-700) !important;
+    border-color: var(--brand-teal-700) !important;
+}
+
+.text-primary {
+    color: var(--brand-teal-700) !important;
+}
+
+.bg-primary {
+    background-color: var(--brand-teal-700) !important;
+}
+
+.bg-primary-subtle {
+    background-color: var(--brand-teal-100) !important;
+}
+
+.border-primary {
+    border-color: var(--brand-teal-500) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--brand-teal-700);
+    border-color: var(--brand-teal-700);
+}
+
+.page-item.active .page-link,
+.pagination .active > .page-link {
+    color: #ffffff;
+    background-color: var(--brand-teal-700);
+    border-color: var(--brand-teal-700);
+}
+
+.page-link {
+    color: var(--brand-teal-700);
+}
+
+.page-link:hover {
+    color: var(--brand-teal-800);
+    background: var(--brand-teal-50);
+}
+
+/* Sidebar brand feedback */
+.sidebar .nav .nav-item.active > .nav-link,
+.sidebar .nav .nav-item.active > .nav-link .menu-title,
+.sidebar .nav .nav-item.active > .nav-link .menu-icon {
+    color: var(--brand-teal-700) !important;
+}
+
+.sidebar .nav .nav-item.active > .nav-link .icon-bg {
+    background: var(--brand-teal-100) !important;
+}
+
+.sidebar .nav .nav-item .nav-link:hover .menu-title,
+.sidebar .nav .nav-item .nav-link:hover .menu-icon {
+    color: var(--brand-teal-700) !important;
+}
