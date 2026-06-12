@@ -14,3 +14,4 @@ Route::group(['prefix' => 'dashboard'], function () {
 
 /* Domain route files are loaded here. Keep business logic out of web.php. */
 require __DIR__ . '/userRoutes.php';
+require __DIR__ . '/fileManagerRoutes.php';

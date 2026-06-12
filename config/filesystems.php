@@ -47,6 +47,20 @@ return [
             'report' => false,
         ],
 
+        'ftp' => [
+            'driver' => 'ftp',
+            'host' => env('FTP_HOST'),
+            'port' => (int) env('FTP_PORT', 21),
+            'username' => env('FTP_USERNAME'),
+            'password' => env('FTP_PASSWORD'),
+            'root' => env('FTP_ROOT', '/'),
+            'url' => rtrim(env('FTP_URL', ''), '/'),
+            'passive' => filter_var(env('FTP_PASSIVE', true), FILTER_VALIDATE_BOOL),
+            'ssl' => filter_var(env('FTP_SSL', false), FILTER_VALIDATE_BOOL),
+            'timeout' => (int) env('FTP_TIMEOUT', 30),
+            'throw' => true,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

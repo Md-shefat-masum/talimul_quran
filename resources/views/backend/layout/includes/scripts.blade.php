@@ -11,3 +11,19 @@
 <script src="{{ asset('assets/backend/js/common/alert-helper.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/common/form-error-helper.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/common/select2-axios.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/vendor/vue.global.prod.js') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/vendor/vue-demi.iife.js') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/vendor/pinia.iife.prod.js') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/config.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/api/file-manager-api.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/utils/canvas-editor.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/store/file-manager-store.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/floating-button.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/sidebar.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/toolbar.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/file-grid.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/details-panel.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/upload-panel.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/modal-shell.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/bridge.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/app.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>

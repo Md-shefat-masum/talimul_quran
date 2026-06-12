@@ -130,11 +130,11 @@
 
                     return '<div class="user-row-actions" aria-label="User actions for ' + safeName + '">' +
                         '<button type="button" class="user-action-btn user-action-btn--view js-show-user-detail" data-user-id="' + userId + '">' +
-                        '<i class="mdi mdi-eye-outline"></i><span></span></button>' +
+                        '<i class="mdi mdi-eye-outline"></i></button>' +
                         '<button type="button" class="user-action-btn user-action-btn--edit js-edit-user-modal" data-user-id="' + userId + '">' +
-                        '<i class="mdi mdi-pencil-outline"></i><span></span></button>' +
+                        '<i class="mdi mdi-pencil-outline"></i></button>' +
                         '<button type="button" class="user-action-btn user-action-btn--delete js-delete-user" data-user-id="' + userId + '" data-user-name="' + safeName + '">' +
-                        '<i class="mdi mdi-delete-outline"></i><span></span></button>' +
+                        '<i class="mdi mdi-delete-outline"></i></button>' +
                         '<div class="user-more-action">' +
                         '<button type="button" class="user-action-btn user-action-btn--more" aria-haspopup="true" aria-expanded="false">' +
                         '<i class="mdi mdi-format-align-justify"></i><span>More</span></button>' +
