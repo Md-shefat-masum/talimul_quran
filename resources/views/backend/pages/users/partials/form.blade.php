@@ -6,6 +6,10 @@
     $selectedTypeId = old('user_type_id', $user?->user_type_id);
     $selectedTypeText = old('user_type_text', $user?->userType?->name);
     $selectedStatus = (string) old('status', $user?->status ?? 1);
+    $avatarUrl = old('avatar_url', $user?->avatar_url);
+    $avatarPath = old('avatar_path', $user?->avatar_path);
+    $documentUrls = old('document_urls', $user?->document_urls ?? []);
+    $documentPaths = old('document_paths', $user?->document_paths ?? []);
 @endphp
 
 <form
@@ -92,6 +96,50 @@
                 <i class="mdi mdi-information-outline me-1"></i>
                 Dynamic database options use AJAX Select2. Fixed options use a normal select.
             </div>
+        </div>
+
+        <div class="col-12">
+            @include('backend.components.file-manager-picker', [
+                'formId' => $formId,
+                'field' => 'avatar_url',
+                'pathField' => 'avatar_path',
+                'id' => $formId.'-avatar-url',
+                'label' => 'Avatar',
+                'value' => $avatarUrl,
+                'pathValue' => $avatarPath,
+                'placeholder' => 'No avatar selected',
+                'preview' => 'image',
+                'size' => '512x512',
+                'folder' => 'users/avatars',
+                'usageModule' => 'user-management',
+                'usageField' => 'avatar_url',
+                'ownerType' => \App\Models\User::class,
+                'ownerId' => $user?->id,
+                'usageLabel' => $user?->name ? $user->name.' avatar' : 'User avatar',
+            ])
+        </div>
+
+        <div class="col-12">
+            @include('backend.components.file-manager-picker', [
+                'formId' => $formId,
+                'field' => 'document_urls',
+                'pathField' => 'document_paths',
+                'id' => $formId.'-document-urls',
+                'label' => 'Documents / Photos',
+                'value' => $documentUrls,
+                'pathValue' => $documentPaths,
+                'placeholder' => 'No documents selected',
+                'preview' => 'image',
+                'folder' => 'users/documents',
+                'multiple' => true,
+                'valueFormat' => 'json',
+                'buttonText' => 'Select Documents',
+                'usageModule' => 'user-management',
+                'usageField' => 'document_urls',
+                'ownerType' => \App\Models\User::class,
+                'ownerId' => $user?->id,
+                'usageLabel' => $user?->name ? $user->name.' documents' : 'User documents',
+            ])
         </div>
 
         <div class="col-md-6">

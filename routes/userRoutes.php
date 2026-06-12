@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::prefix('dashboard')
     ->name('backend.')
-    // ->middleware(['auth'])
+    ->middleware(['dashboard.auth'])
     ->group(function (): void {
         Route::get('users/data', [UserController::class, 'data'])->name('users.data');
         Route::get('users/options/user-types', [UserController::class, 'userTypeOptions'])->name('users.options.user-types');

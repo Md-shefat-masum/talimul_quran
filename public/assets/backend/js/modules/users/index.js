@@ -26,11 +26,13 @@
         var statusLabel = Number(user.status) === 1 ? 'Active' : 'Inactive';
         var userType = user.user_type_text || 'Not assigned';
         var phone = user.phone || 'Not provided';
+        var avatar = user.avatar_url || 'Not selected';
 
         return '<div class="user-detail-list">' +
             '<div><span>Name</span><strong>' + escapeHtml(user.name) + '</strong></div>' +
             '<div><span>Email</span><strong>' + escapeHtml(user.email) + '</strong></div>' +
             '<div><span>Phone</span><strong>' + escapeHtml(phone) + '</strong></div>' +
+            '<div><span>Avatar</span><strong>' + escapeHtml(avatar) + '</strong></div>' +
             '<div><span>User Type</span><strong>' + escapeHtml(userType) + '</strong></div>' +
             '<div><span>Status</span><strong>' + escapeHtml(statusLabel) + '</strong></div>' +
             '</div>';
@@ -95,12 +97,15 @@
             {
                 data: 'name',
                 name: 'name',
-                render: function (data) {
+                render: function (data, type, row) {
                     var name = escapeHtml(data);
                     var initial = name ? name.charAt(0).toUpperCase() : '?';
+                    var avatar = row.avatar_url
+                        ? '<img src="' + escapeHtml(row.avatar_url) + '" alt="' + name + '">'
+                        : initial;
 
                     return '<div class="d-flex align-items-center gap-2">' +
-                        '<span class="user-table-avatar">' + initial + '</span>' +
+                        '<span class="user-table-avatar">' + avatar + '</span>' +
                         '<span class="fw-semibold text-dark">' + name + '</span>' +
                         '</div>';
                 }

@@ -26,6 +26,10 @@
             name: formData.get('name'),
             email: formData.get('email'),
             phone: formData.get('phone'),
+            avatar_url: formData.get('avatar_url'),
+            avatar_path: formData.get('avatar_path'),
+            document_urls: formData.get('document_urls'),
+            document_paths: formData.get('document_paths'),
             user_type_id: formData.get('user_type_id'),
             status: formData.get('status'),
             password: formData.get('password'),
@@ -42,6 +46,145 @@
         }
     }
 
+    function getAvatarElements(form) {
+        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="avatar_url"]');
+
+        return {
+            urlInput: form.querySelector('[name="avatar_url"]'),
+            pathInput: form.querySelector('[name="avatar_path"]'),
+            displayInput: picker ? picker.querySelector('.js-file-manager-display') : null,
+            preview: picker ? picker.querySelector('[data-file-manager-preview]') : null,
+            trigger: picker ? picker.querySelector('[data-file-manager-target]') : null
+        };
+    }
+
+    function renderAvatarPreview(preview, url) {
+        if (!preview) {
+            return;
+        }
+
+        preview.innerHTML = url
+            ? '<img src="' + url + '" alt="Selected avatar">'
+            : '<i class="mdi mdi-account-circle-outline"></i>';
+    }
+
+    function setAvatar(form, url, path) {
+        var elements = getAvatarElements(form);
+
+        if (elements.urlInput) {
+            elements.urlInput.value = url || '';
+        }
+
+        if (elements.pathInput) {
+            elements.pathInput.value = path || '';
+        }
+
+        if (elements.displayInput) {
+            elements.displayInput.value = url || '';
+        }
+
+        renderAvatarPreview(elements.preview, url);
+    }
+
+    function syncAvatarFromSelection(form) {
+        var elements = getAvatarElements(form);
+        var paths = [];
+
+        if (!elements.urlInput) {
+            return;
+        }
+
+        try {
+            paths = JSON.parse(elements.urlInput.dataset.selectedPaths || '[]');
+        } catch (error) {
+            paths = [];
+        }
+
+        setAvatar(form, elements.urlInput.value, paths[0] || '');
+    }
+
+    function setAvatarUsageContext(form, user) {
+        var elements = getAvatarElements(form);
+
+        if (!elements.trigger) {
+            return;
+        }
+
+        elements.trigger.dataset.fileManagerOwnerId = user && user.id ? String(user.id) : '';
+        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' avatar' : 'User avatar';
+    }
+
+    function getDocumentElements(form) {
+        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="document_urls"]');
+
+        return {
+            urlInput: form.querySelector('[name="document_urls"]'),
+            pathInput: form.querySelector('[name="document_paths"]'),
+            displayInput: picker ? picker.querySelector('.js-file-manager-display') : null,
+            gallery: picker ? picker.querySelector('[data-file-manager-gallery]') : null,
+            trigger: picker ? picker.querySelector('[data-file-manager-target]') : null
+        };
+    }
+
+    function toJsonArray(values) {
+        if (Array.isArray(values)) {
+            return JSON.stringify(values.filter(Boolean));
+        }
+
+        if (typeof values === 'string' && values.trim() !== '') {
+            try {
+                var decoded = JSON.parse(values);
+
+                return JSON.stringify(Array.isArray(decoded) ? decoded.filter(Boolean) : []);
+            } catch (error) {
+                return JSON.stringify([]);
+            }
+        }
+
+        return JSON.stringify([]);
+    }
+
+    function setDocuments(form, urls, paths) {
+        var elements = getDocumentElements(form);
+        var parsedUrls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+        var parsedPaths = Array.isArray(paths) ? paths.filter(Boolean) : [];
+
+        if (elements.urlInput) {
+            elements.urlInput.value = toJsonArray(parsedUrls);
+        }
+
+        if (elements.pathInput) {
+            elements.pathInput.value = toJsonArray(parsedPaths);
+        }
+
+        if (elements.displayInput) {
+            elements.displayInput.value = parsedUrls.length ? parsedUrls.length + ' file(s) selected' : '';
+        }
+
+        if (elements.gallery) {
+            elements.gallery.innerHTML = parsedUrls.map(function (url, index) {
+                var name = url.split('/').pop() || ('Document ' + (index + 1));
+
+                return '<button type="button" class="file-manager-picker__chip" data-file-manager-remove-index="' + index + '">' +
+                    '<img src="' + url + '" alt="Document ' + (index + 1) + '">' +
+                    '<span>' + name + '</span>' +
+                    '<i class="mdi mdi-close"></i>' +
+                    '</button>';
+            }).join('');
+        }
+    }
+
+    function setDocumentUsageContext(form, user) {
+        var elements = getDocumentElements(form);
+
+        if (!elements.trigger) {
+            return;
+        }
+
+        elements.trigger.dataset.fileManagerOwnerId = user && user.id ? String(user.id) : '';
+        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' documents' : 'User documents';
+    }
+
     function updateSubmitText(form, text) {
         var idle = form.querySelector('.js-submit-idle');
 
@@ -55,6 +198,10 @@
         form.dataset.mode = 'create';
         form.dataset.userId = '';
         window.formErrorHelper.clear(form);
+        setAvatar(form, '', '');
+        setAvatarUsageContext(form, null);
+        setDocuments(form, [], []);
+        setDocumentUsageContext(form, null);
 
         var userType = $(form).find('.js-user-type-select');
         userType.val(null).trigger('change');
@@ -71,6 +218,10 @@
         form.querySelector('[name="name"]').value = user.name || '';
         form.querySelector('[name="email"]').value = user.email || '';
         form.querySelector('[name="phone"]').value = user.phone || '';
+        setAvatar(form, user.avatar_url || '', user.avatar_path || '');
+        setAvatarUsageContext(form, user);
+        setDocuments(form, user.document_urls || [], user.document_paths || []);
+        setDocumentUsageContext(form, user);
         form.querySelector('[name="status"]').value = String(user.status);
         form.querySelector('[name="password"]').value = '';
         form.querySelector('[name="password_confirmation"]').value = '';
@@ -142,6 +293,19 @@
             event.preventDefault();
             handleSubmit(form);
         });
+
+        form.addEventListener('file-manager:selected', function (event) {
+            if (event.target && event.target.name === 'avatar_url') {
+                syncAvatarFromSelection(form);
+            }
+        });
+
+        var clearAvatarButton = form.querySelector('[data-file-manager-picker][data-picker-field="avatar_url"] .js-file-manager-clear');
+        if (clearAvatarButton) {
+            clearAvatarButton.addEventListener('click', function () {
+                setAvatar(form, '', '');
+            });
+        }
 
         form.dataset.initialized = 'true';
     }

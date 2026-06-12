@@ -6,8 +6,27 @@
             list: '/dashboard/file-manager',
             uploadPhoto: '/dashboard/file-manager/photo',
             folder: '/dashboard/file-manager/folder',
-            destroy: '/dashboard/file-manager/item'
+            usage: '/dashboard/file-manager/usage',
+            rename: '/dashboard/file-manager/item/rename',
+            move: '/dashboard/file-manager/item/move',
+            destroy: '/dashboard/file-manager/item',
+            thumbnailCache: '/dashboard/file-manager/maintenance/thumbnail-cache',
+            importMedia: '/dashboard/file-manager/maintenance/import',
+            importHistory: '/dashboard/file-manager/maintenance/imports',
+            folderPermissions: '/dashboard/file-manager/folder/permissions'
         },
+        permissions: Object.assign({
+            read: true,
+            upload: true,
+            create_folder: true,
+            rename: true,
+            move: true,
+            delete: true,
+            force_delete: false,
+            track_usage: true,
+            forget_usage: true,
+            maintenance: false
+        }, window.FileManagerPermissions || {}),
         presets: [
             {key: 'free', label: 'Free crop', width: null, height: null},
             {key: 'avatar', label: 'Avatar 512 x 512', width: 512, height: 512},

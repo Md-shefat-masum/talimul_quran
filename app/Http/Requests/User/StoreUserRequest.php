@@ -18,6 +18,10 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
             'email' => ['required', 'email', 'max:190', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'avatar_url' => ['nullable', 'url', 'max:1000'],
+            'avatar_path' => ['nullable', 'string', 'max:500'],
+            'document_urls' => ['nullable', 'json'],
+            'document_paths' => ['nullable', 'json'],
             'user_type_id' => [
                 'required',
                 'integer',

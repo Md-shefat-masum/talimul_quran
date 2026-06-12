@@ -28,6 +28,10 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'avatar_url',
+        'avatar_path',
+        'document_urls',
+        'document_paths',
         'user_type_id',
         'status',
         'password',
@@ -54,6 +58,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'boolean',
+            'document_urls' => 'array',
+            'document_paths' => 'array',
         ];
     }
 

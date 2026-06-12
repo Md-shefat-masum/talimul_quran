@@ -29,6 +29,29 @@
         return target;
     }
 
+    function parseUsageContext(trigger) {
+        if (!trigger || !trigger.dataset.fileManagerUsageModule) {
+            return null;
+        }
+
+        return {
+            module: trigger.dataset.fileManagerUsageModule,
+            owner_type: trigger.dataset.fileManagerOwnerType || trigger.dataset.fileManagerUsageOwnerType || '',
+            owner_id: trigger.dataset.fileManagerOwnerId || trigger.dataset.fileManagerUsageOwnerId || '',
+            field_name: trigger.dataset.fileManagerUsageField || trigger.dataset.fileManagerField || '',
+            collection: trigger.dataset.fileManagerUsageCollection || '',
+            label: trigger.dataset.fileManagerUsageLabel || ''
+        };
+    }
+
+    function formatSelectionValue(values, opener) {
+        if (opener.valueFormat === 'json') {
+            return JSON.stringify(values);
+        }
+
+        return opener.multiple ? values.join(',') : (values[0] || '');
+    }
+
     window.FileManagerBridge = {
         store: null,
 
@@ -56,11 +79,11 @@
             });
 
             if (target) {
-                if (target.type === 'file') {
-                    target.dataset.selectedPaths = JSON.stringify(paths);
-                    target.dataset.selectedUrls = JSON.stringify(urls);
-                } else {
-                    target.value = opener.multiple ? urls.join(',') : urls[0];
+                target.dataset.selectedPaths = JSON.stringify(paths);
+                target.dataset.selectedUrls = JSON.stringify(urls);
+
+                if (target.type !== 'file') {
+                    target.value = formatSelectionValue(urls, opener);
                 }
 
                 target.dispatchEvent(new Event('change', {bubbles: true}));
@@ -72,6 +95,17 @@
 
             if (typeof opener.callback === 'function') {
                 opener.callback(items, urls, paths);
+            }
+
+            if (
+                opener.usage &&
+                opener.usage.module &&
+                opener.usage.field_name &&
+                (!window.FileManagerBridge.store || window.FileManagerBridge.store.canTrackUsage)
+            ) {
+                window.FileManagerApi.trackUsage(items, opener.usage).catch(function (error) {
+                    window.console.warn('File manager usage tracking failed.', error);
+                });
             }
         },
 
@@ -90,7 +124,9 @@
                     multiple: trigger.dataset.fileManagerMultiple === 'true' || trigger.hasAttribute('data-file-manager-multiple'),
                     accept: trigger.dataset.fileManagerAccept || 'image/*',
                     size: parseSize(trigger.dataset.fileManagerSize),
-                    path: trigger.dataset.fileManagerPath || ''
+                    valueFormat: trigger.dataset.fileManagerValueFormat || (trigger.hasAttribute('data-file-manager-multiple') ? 'json' : 'string'),
+                    path: trigger.dataset.fileManagerPath || '',
+                    usage: parseUsageContext(trigger)
                 });
             });
         }

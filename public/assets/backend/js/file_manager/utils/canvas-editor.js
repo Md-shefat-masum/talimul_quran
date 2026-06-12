@@ -51,9 +51,25 @@
         });
     }
 
+    function dataUrlToFile(dataUrl, fileName) {
+        var parts = dataUrl.split(',');
+        var meta = parts[0].match(/:(.*?);/);
+        var mime = meta ? meta[1] : 'image/jpeg';
+        var binary = atob(parts[1]);
+        var length = binary.length;
+        var bytes = new Uint8Array(length);
+
+        while (length--) {
+            bytes[length] = binary.charCodeAt(length);
+        }
+
+        return new File([bytes], fileName, {type: mime});
+    }
+
     window.FileManagerCanvasEditor = {
         loadImage: loadImage,
         renderToCanvas: renderToCanvas,
-        canvasToFile: canvasToFile
+        canvasToFile: canvasToFile,
+        dataUrlToFile: dataUrlToFile
     };
 })(window);

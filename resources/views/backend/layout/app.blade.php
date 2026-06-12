@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{{ asset('assets/backend/plugins/sweetalert2/sweetalert2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/backend/styles/theme-teal.css') }}?v={{ env('APP_VERSION', '1.0.0') }}">
     <link rel="stylesheet" href="{{ asset('assets/backend/styles/modules/users.css') }}?v={{ env('APP_VERSION', '1.0.0') }}">
+    <link rel="stylesheet" href="{{ asset('assets/backend/js/file_manager/vendor/filerobot-image-editor.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/backend/js/file_manager/file-manager.css') }}?v={{ env('APP_VERSION', '1.0.0') }}">
     @stack('styles')
 
