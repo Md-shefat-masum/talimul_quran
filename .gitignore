@@ -24,6 +24,7 @@ Homestead.yaml
 Thumbs.db
 
 *.md
+!Doc/CRUD/*.md
 /public/html
 /public/uploads
 *.zip

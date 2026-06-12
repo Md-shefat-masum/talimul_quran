@@ -10,6 +10,9 @@
     var modalForm = document.getElementById('userModalForm');
     var userTypeFilter = document.getElementById('filterUserType');
     var statusFilter = document.getElementById('filterUserStatus');
+    var perPageSelect = document.getElementById('usersPerPage');
+    var quickSearchInput = document.getElementById('usersQuickSearch');
+    var quickSearchTimer = null;
 
     function escapeHtml(value) {
         return $('<div>').text(value == null ? '' : String(value)).html();
@@ -17,6 +20,20 @@
 
     function replaceUserId(urlTemplate, userId) {
         return urlTemplate.replace('__USER_ID__', String(userId));
+    }
+
+    function buildUserDetailsHtml(user) {
+        var statusLabel = Number(user.status) === 1 ? 'Active' : 'Inactive';
+        var userType = user.user_type_text || 'Not assigned';
+        var phone = user.phone || 'Not provided';
+
+        return '<div class="user-detail-list">' +
+            '<div><span>Name</span><strong>' + escapeHtml(user.name) + '</strong></div>' +
+            '<div><span>Email</span><strong>' + escapeHtml(user.email) + '</strong></div>' +
+            '<div><span>Phone</span><strong>' + escapeHtml(phone) + '</strong></div>' +
+            '<div><span>User Type</span><strong>' + escapeHtml(userType) + '</strong></div>' +
+            '<div><span>Status</span><strong>' + escapeHtml(statusLabel) + '</strong></div>' +
+            '</div>';
     }
 
     function updateSummary(summary) {
@@ -41,7 +58,17 @@
         searchDelay: 350,
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
+        dom: 'rt<"user-table-footer"ip>',
         order: [[6, 'desc']],
+        columnDefs: [
+            {responsivePriority: 1, targets: 7},
+            {responsivePriority: 2, targets: 1},
+            {responsivePriority: 3, targets: 5},
+            {responsivePriority: 4, targets: 2},
+            {responsivePriority: 5, targets: 6},
+            {responsivePriority: 20, targets: 4},
+            {responsivePriority: 30, targets: 3}
+        ],
         ajax: function (requestData, callback) {
             requestData.filters = {
                 status: statusFilter.value,
@@ -95,18 +122,32 @@
                 name: 'actions',
                 orderable: false,
                 searchable: false,
-                className: 'text-end',
+                className: 'text-end all',
                 render: function (userId, type, row) {
                     var editUrl = replaceUserId(page.dataset.editUrlTemplate, userId);
                     var safeName = escapeHtml(row.name);
+                    var exportUrl = page.dataset.exportUrl + '?search=' + encodeURIComponent(row.email || row.name || '');
 
-                    return '<div class="btn-group btn-group-sm user-action-group" role="group" aria-label="User actions">' +
-                        '<button type="button" class="btn btn-outline-primary js-edit-user-modal" data-user-id="' + userId + '" title="Quick edit">' +
-                        '<i class="mdi mdi-pencil-outline"></i></button>' +
-                        '<a class="btn btn-outline-secondary" href="' + editUrl + '" title="Open edit page">' +
-                        '<i class="mdi mdi-open-in-new"></i></a>' +
-                        '<button type="button" class="btn btn-outline-danger js-delete-user" data-user-id="' + userId + '" data-user-name="' + safeName + '" title="Delete user">' +
-                        '<i class="mdi mdi-delete-outline"></i></button>' +
+                    return '<div class="user-row-actions" aria-label="User actions for ' + safeName + '">' +
+                        '<button type="button" class="user-action-btn user-action-btn--view js-show-user-detail" data-user-id="' + userId + '">' +
+                        '<i class="mdi mdi-eye-outline"></i><span></span></button>' +
+                        '<button type="button" class="user-action-btn user-action-btn--edit js-edit-user-modal" data-user-id="' + userId + '">' +
+                        '<i class="mdi mdi-pencil-outline"></i><span></span></button>' +
+                        '<button type="button" class="user-action-btn user-action-btn--delete js-delete-user" data-user-id="' + userId + '" data-user-name="' + safeName + '">' +
+                        '<i class="mdi mdi-delete-outline"></i><span></span></button>' +
+                        '<div class="user-more-action">' +
+                        '<button type="button" class="user-action-btn user-action-btn--more" aria-haspopup="true" aria-expanded="false">' +
+                        '<i class="mdi mdi-format-align-justify"></i><span>More</span></button>' +
+                        '<div class="user-action-menu">' +
+                        '<ul>' +
+                        '<li><button type="button" class="js-show-user-detail" data-user-id="' + userId + '"><i class="mdi mdi-eye-outline"></i><span>View details</span></button></li>' +
+                        '<li><button type="button" class="js-edit-user-modal" data-user-id="' + userId + '"><i class="mdi mdi-pencil-outline"></i><span>Quick edit</span></button></li>' +
+                        '<li><a href="' + editUrl + '"><i class="mdi mdi-open-in-new"></i><span>Open edit page</span></a></li>' +
+                        '<li><a href="' + exportUrl + '"><i class="mdi mdi-file-delimited-outline"></i><span>Export this user</span></a></li>' +
+                        '<li><button type="button" class="js-delete-user user-action-menu__danger" data-user-id="' + userId + '" data-user-name="' + safeName + '"><i class="mdi mdi-delete-outline"></i><span>Delete user</span></button></li>' +
+                        '</ul>' +
+                        '</div>' +
+                        '</div>' +
                         '</div>';
                 }
             }
@@ -161,6 +202,32 @@
             });
     }
 
+    function showUserDetails(userId) {
+        window.appAxios.get(replaceUserId(page.dataset.showUrlTemplate, userId))
+            .then(function (response) {
+                var user = response.data.data || {};
+
+                if (typeof window.Swal === 'undefined') {
+                    window.alert([user.name, user.email, user.phone].filter(Boolean).join('\n'));
+                    return;
+                }
+
+                window.Swal.fire({
+                    title: 'User Details',
+                    html: buildUserDetailsHtml(user),
+                    width: 520,
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#08766f',
+                    customClass: {
+                        popup: 'user-detail-dialog'
+                    }
+                });
+            })
+            .catch(function (error) {
+                window.appAlert.errorFromException(error);
+            });
+    }
+
     function deleteUser(userId, name) {
         window.appAlert.confirmDelete(name).then(function (confirmed) {
             if (!confirmed) {
@@ -196,6 +263,7 @@
     document.getElementById('clearUsersFilters').addEventListener('click', function () {
         statusFilter.value = '';
         $(userTypeFilter).val(null).trigger('change');
+        quickSearchInput.value = '';
         table.search('');
         reloadTable(true);
     });
@@ -207,9 +275,21 @@
     statusFilter.addEventListener('change', function () {
         reloadTable(true);
     });
+    perPageSelect.addEventListener('change', function () {
+        table.page.len(Number(this.value)).draw();
+    });
+    quickSearchInput.addEventListener('input', function () {
+        window.clearTimeout(quickSearchTimer);
+        quickSearchTimer = window.setTimeout(function () {
+            table.search(quickSearchInput.value).draw();
+        }, 250);
+    });
 
     $('#usersTable').on('click', '.js-edit-user-modal', function () {
         openEditModal(this.dataset.userId);
+    });
+    $('#usersTable').on('click', '.js-show-user-detail', function () {
+        showUserDetails(this.dataset.userId);
     });
     $('#usersTable').on('click', '.js-delete-user', function () {
         deleteUser(this.dataset.userId, this.dataset.userName);
