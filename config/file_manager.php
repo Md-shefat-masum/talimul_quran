@@ -16,6 +16,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Import Audit Retention
+    |--------------------------------------------------------------------------
+    |
+    | Import rows are useful for operator history, but should not grow without
+    | a maintenance policy. The prune command keeps recent rows by age and also
+    | preserves the newest fixed number of rows.
+    |
+    */
+    'import_retention_days' => (int) env('FILE_MANAGER_IMPORT_RETENTION_DAYS', 90),
+    'import_retention_keep' => (int) env('FILE_MANAGER_IMPORT_RETENTION_KEEP', 100),
+    'import_retention_schedule' => [
+        'enabled' => filter_var(env('FILE_MANAGER_PRUNE_IMPORTS_SCHEDULE', false), FILTER_VALIDATE_BOOL),
+        'time' => env('FILE_MANAGER_PRUNE_IMPORTS_TIME', '02:30'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Public Route Compatibility
     |--------------------------------------------------------------------------
     |

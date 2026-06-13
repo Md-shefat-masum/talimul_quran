@@ -455,5 +455,42 @@ Multiple selection:
 - `php artisan test tests/Feature/FileManagerTest.php` passed after the auth baseline change.
 - `php artisan route:list --path=dashboard/users` shows 10 protected user-management routes.
 
+## Stability Readiness Verification
+- Added `php artisan file-manager:doctor` for repeatable file-manager readiness checks without exposing secrets.
+- Doctor checks database source mode, configured storage disk, disk driver, public file URL, guest lock state, required media tables, and required FTP config values.
+- `php artisan file-manager:doctor` passed locally with the active FTP disk config and `FTP_URL=https://posftp.bme.com.bd`.
+- `php artisan list file-manager` now shows `file-manager:doctor` and `file-manager:import-media`.
+- `php artisan test` passed with 22 tests and 133 assertions.
+- `php artisan migrate:status` confirms all file-manager/user media migrations are applied.
+- `npm run build` passed. Sass deprecation warnings are present from Bootstrap/import syntax, but the build exits successfully.
+
+## Import Audit Retention Verification
+- Added `FILE_MANAGER_IMPORT_RETENTION_DAYS` and `FILE_MANAGER_IMPORT_RETENTION_KEEP` config defaults.
+- Added optional `FILE_MANAGER_PRUNE_IMPORTS_SCHEDULE` and `FILE_MANAGER_PRUNE_IMPORTS_TIME` config.
+- Added `php artisan file-manager:prune-imports`.
+- Prune command deletes import audit rows older than the configured age while always preserving the newest configured number of rows.
+- Command supports `--days`, `--keep`, and `--dry-run` overrides.
+- The scheduled prune task is disabled by default and appears in `php artisan schedule:list` only when enabled through env.
+- Verified `FILE_MANAGER_PRUNE_IMPORTS_SCHEDULE=true FILE_MANAGER_PRUNE_IMPORTS_TIME=03:15 php artisan schedule:list` registers a daily `file-manager:prune-imports` task.
+- `php artisan file-manager:prune-imports --dry-run` passed locally and reported zero rows to prune.
+- `php artisan list file-manager` now shows `file-manager:doctor`, `file-manager:import-media`, and `file-manager:prune-imports`.
+- Added feature coverage for dry-run, retention keep count, and real prune deletion.
+- `php artisan test` passed with 23 tests and 141 assertions.
+- `npm run build` passed.
+
+## Browser Visual QA Verification
+- Browser plugin was absent, so Playwright CLI fallback was used.
+- Local Laravel server was verified at `http://127.0.0.1:8005`.
+- Authenticated browser session loaded `/dashboard/users` as `User Management | Laravel`.
+- User directory first viewport rendered with summary cards, filters, table rows, action buttons, and floating file-manager launcher.
+- Quick Add User modal rendered the reusable avatar picker and the multiple `Documents / Photos` picker.
+- File manager opened from the documents picker and rendered the database media modal, sidebar, maintenance panel, import history state, toolbar, folder grid, and details panel.
+- Folder details panel rendered the folder permission override matrix.
+- Temporary `Upload = Deny` override was saved and then reset to `Inherit`; DB cleanup confirmed `permission_overrides=[]` for the `uploads` folder.
+- Browser console stayed clean after dashboard load and folder-permission interaction.
+- Mobile viewport `390x844` screenshot captured the active file-manager/modal stack.
+- Screenshot evidence copied to `/private/tmp/file-manager-qa`.
+
 ## Next Stage
 - Add a central dashboard-auth/login strategy when the real admin login surface is introduced; `dashboard.auth` can then redirect there instead of the frontend home route.
+- Optional: schedule `file-manager:prune-imports` in production once the retention window is confirmed.

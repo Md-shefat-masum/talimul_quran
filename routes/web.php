@@ -22,3 +22,7 @@ require __DIR__ . '/fileManagerRoutes.php';
 //     $path = \Illuminate\Support\Facades\Storage::disk('ftp')->put('text', new \Illuminate\Http\File(public_path('robots.txt')));
 //     return $path;
 // });
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

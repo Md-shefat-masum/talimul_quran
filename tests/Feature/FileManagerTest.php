@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Media;
 use App\Models\MediaFolder;
+use App\Models\MediaImport;
 use App\Models\MediaInUse;
 use App\Models\User;
 use App\Services\FileManager\FileManagerService;
@@ -449,6 +450,32 @@ class FileManagerTest extends TestCase
         ]);
     }
 
+    public function test_import_audit_rows_can_be_pruned_with_retention_policy(): void
+    {
+        $old = $this->createImportAudit('old', now()->subDays(120));
+        $keptByCount = $this->createImportAudit('kept-by-count', now()->subDays(110));
+        $recent = $this->createImportAudit('recent', now()->subDays(5));
+
+        $this->artisan('file-manager:prune-imports', [
+            '--days' => 90,
+            '--keep' => 2,
+            '--dry-run' => true,
+        ])->assertExitCode(0);
+
+        $this->assertDatabaseHas('media_imports', ['id' => $old->id]);
+        $this->assertDatabaseHas('media_imports', ['id' => $keptByCount->id]);
+        $this->assertDatabaseHas('media_imports', ['id' => $recent->id]);
+
+        $this->artisan('file-manager:prune-imports', [
+            '--days' => 90,
+            '--keep' => 2,
+        ])->assertExitCode(0);
+
+        $this->assertDatabaseMissing('media_imports', ['id' => $old->id]);
+        $this->assertDatabaseHas('media_imports', ['id' => $keptByCount->id]);
+        $this->assertDatabaseHas('media_imports', ['id' => $recent->id]);
+    }
+
     private function jpegContents(int $width = 120, int $height = 90): string
     {
         $image = imagecreatetruecolor($width, $height);
@@ -483,5 +510,28 @@ class FileManagerTest extends TestCase
             'folders' => [['id' => $folder->id, 'name' => $folder->name, 'path' => 'uploads']],
             'status' => 1,
         ]);
+    }
+
+    private function createImportAudit(string $root, \DateTimeInterface $createdAt): MediaImport
+    {
+        $import = MediaImport::query()->create([
+            'disk' => 'ftp',
+            'root' => $root,
+            'recursive' => true,
+            'dry_run' => false,
+            'status' => 'completed',
+            'scanned' => 1,
+            'created' => 1,
+            'updated' => 0,
+            'skipped' => 0,
+            'failed' => 0,
+            'started_at' => $createdAt,
+            'finished_at' => $createdAt,
+        ]);
+        $import->created_at = $createdAt;
+        $import->updated_at = $createdAt;
+        $import->save();
+
+        return $import->refresh();
     }
 }
