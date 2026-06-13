@@ -49,6 +49,12 @@
                     item: null,
                     destination: ''
                 },
+                deleteDialog: {
+                    isOpen: false,
+                    item: null,
+                    usage: null,
+                    loadingUsage: false
+                },
                 dragDrop: {
                     item: null,
                     overPath: '',
@@ -174,6 +180,8 @@
             },
 
             open: function (options) {
+                var store = this;
+
                 options = options || {};
                 this.opener = {
                     target: options.target || null,
@@ -189,9 +197,16 @@
                 this.error = '';
                 this.isOpen = true;
                 this.mode = options.mode || 'browse';
-                this.load(options.path || this.path || window.FileManagerConfig.defaults.path, 1);
-                this.loadThumbnailCache();
-                this.loadImportHistory();
+                this.load(options.path || this.path || window.FileManagerConfig.defaults.path, 1).then(function () {
+                    if (!store.canMaintenance) {
+                        return null;
+                    }
+
+                    return Promise.all([
+                        store.loadThumbnailCache(),
+                        store.loadImportHistory()
+                    ]);
+                });
             },
 
             close: function () {
@@ -576,6 +591,58 @@
                 };
             },
 
+            openDeleteDialog: function (item) {
+                var store = this;
+
+                if (!item) {
+                    return;
+                }
+
+                if (!store.canDelete) {
+                    store.setPermissionError();
+                    return;
+                }
+
+                store.activeItem = item;
+                store.deleteDialog = {
+                    isOpen: true,
+                    item: item,
+                    usage: item.usage || null,
+                    loadingUsage: true
+                };
+
+                store.refreshUsage(item).then(function (usage) {
+                    store.deleteDialog.usage = usage;
+                }).catch(function () {
+                    store.deleteDialog.usage = item.usage || null;
+                }).finally(function () {
+                    store.deleteDialog.loadingUsage = false;
+                });
+            },
+
+            closeDeleteDialog: function () {
+                this.deleteDialog = {
+                    isOpen: false,
+                    item: null,
+                    usage: null,
+                    loadingUsage: false
+                };
+            },
+
+            confirmDelete: function (force) {
+                var store = this;
+                var item = store.deleteDialog.item;
+
+                if (!item || store.saving) {
+                    return Promise.resolve(null);
+                }
+
+                return store.destroy(item, Boolean(force)).then(function (response) {
+                    store.closeDeleteDialog();
+                    return response;
+                });
+            },
+
             confirmMove: function () {
                 var store = this;
                 var item = this.moveDialog.item;
@@ -720,10 +787,12 @@
                     if (error.response && error.response.status === 409 && count > 0) {
                         item.usage = usage;
                         store.activeItem = item;
-
-                        if (store.canForceDelete && window.confirm('This item is used in ' + count + ' place(s). Force delete anyway?')) {
-                            return store.destroy(item, true);
-                        }
+                        store.deleteDialog = {
+                            isOpen: true,
+                            item: item,
+                            usage: usage,
+                            loadingUsage: false
+                        };
 
                         if (!store.canForceDelete) {
                             store.error = 'This item is used and requires force-delete permission.';

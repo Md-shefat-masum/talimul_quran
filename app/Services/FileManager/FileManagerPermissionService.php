@@ -33,6 +33,7 @@ class FileManagerPermissionService
 
         $allowed = $this->allowsByPermissionPackage($user, $ability)
             ?? $this->allowsByGate($user, $ability)
+            ?? $this->allowsByUserType($user, $ability)
             ?? (bool) config("file_manager.default_authenticated_permissions.{$ability}", false);
 
         return $this->applyFolderOverride($folder, $ability, $allowed);
@@ -76,6 +77,30 @@ class FileManagerPermissionService
         }
 
         return null;
+    }
+
+    private function allowsByUserType(Authenticatable $user, string $ability): ?bool
+    {
+        if (! method_exists($user, 'userType')) {
+            return null;
+        }
+
+        if (method_exists($user, 'loadMissing')) {
+            $user->loadMissing('userType');
+        }
+        $code = trim((string) ($user->userType?->code ?? ''));
+
+        if ($code === '') {
+            return null;
+        }
+
+        $profile = config("file_manager.user_type_permissions.{$code}");
+
+        if (! is_array($profile) || ! array_key_exists($ability, $profile)) {
+            return null;
+        }
+
+        return (bool) $profile[$ability];
     }
 
     /**

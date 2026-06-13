@@ -6,10 +6,10 @@
     $selectedTypeId = old('user_type_id', $user?->user_type_id);
     $selectedTypeText = old('user_type_text', $user?->userType?->name);
     $selectedStatus = (string) old('status', $user?->status ?? 1);
-    $avatarUrl = old('avatar_url', $user?->avatar_url);
-    $avatarPath = old('avatar_path', $user?->avatar_path);
-    $documentUrls = old('document_urls', $user?->document_urls ?? []);
-    $documentPaths = old('document_paths', $user?->document_paths ?? []);
+    $profileImagePath = old('profile_image_path', $user?->profile_image_path ?? $user?->avatar_path);
+    $profileImageUrl = old('profile_image_url', $user?->profileImageUrl() ?? $user?->avatar_url);
+    $additionalImagePaths = old('additional_image_paths', $user?->additional_image_paths ?? []);
+    $additionalImageUrls = old('additional_image_urls', $user?->additionalImageUrls() ?? []);
 @endphp
 
 <form
@@ -101,44 +101,44 @@
         <div class="col-12">
             @include('backend.components.file-manager-picker', [
                 'formId' => $formId,
-                'field' => 'avatar_url',
-                'pathField' => 'avatar_path',
-                'id' => $formId.'-avatar-url',
-                'label' => 'Avatar',
-                'value' => $avatarUrl,
-                'pathValue' => $avatarPath,
-                'placeholder' => 'No avatar selected',
+                'field' => 'profile_image_url',
+                'pathField' => 'profile_image_path',
+                'id' => $formId.'-profile-image-url',
+                'label' => 'Profile Image',
+                'value' => $profileImageUrl,
+                'pathValue' => $profileImagePath,
+                'placeholder' => 'No profile image selected',
                 'preview' => 'image',
                 'size' => '512x512',
-                'folder' => 'users/avatars',
+                'folder' => 'users/profile-images',
                 'usageModule' => 'user-management',
-                'usageField' => 'avatar_url',
+                'usageField' => 'profile_image_path',
                 'ownerType' => \App\Models\User::class,
                 'ownerId' => $user?->id,
-                'usageLabel' => $user?->name ? $user->name.' avatar' : 'User avatar',
+                'usageLabel' => $user?->name ? $user->name.' profile image' : 'User profile image',
             ])
         </div>
 
         <div class="col-12">
             @include('backend.components.file-manager-picker', [
                 'formId' => $formId,
-                'field' => 'document_urls',
-                'pathField' => 'document_paths',
-                'id' => $formId.'-document-urls',
-                'label' => 'Documents / Photos',
-                'value' => $documentUrls,
-                'pathValue' => $documentPaths,
-                'placeholder' => 'No documents selected',
+                'field' => 'additional_image_urls',
+                'pathField' => 'additional_image_paths',
+                'id' => $formId.'-additional-image-urls',
+                'label' => 'Additional Images',
+                'value' => $additionalImageUrls,
+                'pathValue' => $additionalImagePaths,
+                'placeholder' => 'No additional images selected',
                 'preview' => 'image',
-                'folder' => 'users/documents',
+                'folder' => 'users/additional-images',
                 'multiple' => true,
                 'valueFormat' => 'json',
-                'buttonText' => 'Select Documents',
+                'buttonText' => 'Select Images',
                 'usageModule' => 'user-management',
-                'usageField' => 'document_urls',
+                'usageField' => 'additional_image_paths',
                 'ownerType' => \App\Models\User::class,
                 'ownerId' => $user?->id,
-                'usageLabel' => $user?->name ? $user->name.' documents' : 'User documents',
+                'usageLabel' => $user?->name ? $user->name.' additional images' : 'User additional images',
             ])
         </div>
 

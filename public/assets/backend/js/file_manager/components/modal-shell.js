@@ -11,7 +11,8 @@
             FmFileGrid: window.FileManagerComponents.FileGrid,
             FmDetailsPanel: window.FileManagerComponents.DetailsPanel,
             FmUploadPanel: window.FileManagerComponents.UploadPanel,
-            FmMoveDialog: window.FileManagerComponents.MoveDialog
+            FmMoveDialog: window.FileManagerComponents.MoveDialog,
+            FmDeleteDialog: window.FileManagerComponents.DeleteDialog
         },
         data: function () {
             return {
@@ -45,6 +46,7 @@
             '        <button type="button" class="fm-primary-btn" :disabled="!store.selected.length" @click="store.useSelected"><i class="mdi mdi-check-circle-outline"></i><span>Use selected</span></button>',
             '      </footer>',
             '      <fm-move-dialog></fm-move-dialog>',
+            '      <fm-delete-dialog></fm-delete-dialog>',
             '    </main>',
             '    <button type="button" class="fm-close" @click="store.close" aria-label="Close file manager"><i class="mdi mdi-close"></i></button>',
             '  </div>',

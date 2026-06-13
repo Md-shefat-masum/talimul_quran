@@ -64,6 +64,56 @@ return [
         'maintenance' => true,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | User Type Permission Profiles
+    |--------------------------------------------------------------------------
+    |
+    | If the authenticated user has a related userType with a code, these
+    | profiles are applied before the default authenticated permissions. This
+    | keeps action visibility and backend guards aligned without requiring a
+    | permission package for smaller installations.
+    |
+    */
+    'user_type_permissions' => [
+        'admin' => [
+            'read' => true,
+            'upload' => true,
+            'create_folder' => true,
+            'rename' => true,
+            'move' => true,
+            'delete' => true,
+            'force_delete' => false,
+            'track_usage' => true,
+            'forget_usage' => true,
+            'maintenance' => true,
+        ],
+        'editor' => [
+            'read' => true,
+            'upload' => true,
+            'create_folder' => true,
+            'rename' => true,
+            'move' => true,
+            'delete' => false,
+            'force_delete' => false,
+            'track_usage' => true,
+            'forget_usage' => false,
+            'maintenance' => false,
+        ],
+        'viewer' => [
+            'read' => true,
+            'upload' => false,
+            'create_folder' => false,
+            'rename' => false,
+            'move' => false,
+            'delete' => false,
+            'force_delete' => false,
+            'track_usage' => false,
+            'forget_usage' => false,
+            'maintenance' => false,
+        ],
+    ],
+
     'guest_permissions' => [
         'read' => false,
         'upload' => false,

@@ -137,9 +137,7 @@
                     return;
                 }
 
-                if (window.confirm('Delete "' + this.item.name + '"?')) {
-                    this.store.destroy(this.item);
-                }
+                this.store.openDeleteDialog(this.item);
             }
         },
         template: [

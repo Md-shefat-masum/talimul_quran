@@ -491,6 +491,48 @@ Multiple selection:
 - Mobile viewport `390x844` screenshot captured the active file-manager/modal stack.
 - Screenshot evidence copied to `/private/tmp/file-manager-qa`.
 
+## Stage 6/7 Hardening Verification
+- Stage 6 permission profiles now support `config('file_manager.user_type_permissions')` keyed by authenticated `userType.code`.
+- Built-in profiles cover `admin`, `editor`, and `viewer`, while package permissions, Laravel gates, defaults, and folder overrides continue to work in the existing order.
+- Viewer profile now receives read-only action visibility in the file-manager permission snapshot and backend upload/delete/maintenance guards deny the matching actions.
+- Stage 7 listing now paginates at the database-query level instead of loading all folders/files and slicing in PHP.
+- Folder rows are counted and paginated first, then file rows spill into the same page only for the remaining page size.
+- File rows eager-load their folder relation during listing to avoid repeated folder lookups for display paths.
+- File manager open flow now waits for the current folder permission snapshot before calling maintenance endpoints, avoiding unnecessary 403 responses for non-maintenance profiles.
+- Added feature coverage for user-type permission profiles and mixed folder/file pagination spillover.
+- `php -l` passed for the updated permission service, file-manager service, and feature test.
+- `node --check` passed for the updated file-manager store.
+- `php artisan test --filter=FileManagerTest` passed with 15 tests and 134 assertions.
+- `npm run build` passed. Sass deprecation warnings remain from Bootstrap/import syntax, but the build exits successfully.
+
+## Destructive Action UX Verification
+- Replaced browser `confirm()` delete prompts with an in-modal delete confirmation dialog.
+- Delete actions from the item menu and details panel now open the same usage-aware dialog.
+- The dialog refreshes the selected item usage before confirming deletion and shows the item type, path, database id, usage count, and usage track labels.
+- Used items show a stronger warning that force delete can leave broken image/document references.
+- Force delete is an explicit separate action and is disabled when the current permission snapshot does not include `force_delete`.
+- Backend `409 Conflict` usage responses now reopen the same dialog with the returned usage payload instead of immediately asking for a browser confirm.
+- `node --check` passed for the updated file-manager store, item actions, details panel, modal shell, and new delete dialog component.
+- `php artisan test --filter=FileManagerTest` passed with 15 tests and 134 assertions.
+- `npm run build` passed. Sass deprecation warnings remain from Bootstrap/import syntax, but the build exits successfully.
+- Rendered QA was attempted through the Browser plugin and Playwright fallback, but the Browser runtime was unavailable and the local Playwright browser binary/system Chrome headless launch was blocked in this environment.
+
+## User Profile/Additional Images Verification
+- Added `profile_image_path` and `additional_image_paths` fields to the users table.
+- User create/edit forms now show two file-manager image pickers: `Profile Image` and `Additional Images`.
+- The profile picker is single-select and stores the selected storage path in `profile_image_path`.
+- The additional images picker is multi-select and stores selected storage paths as JSON in `additional_image_paths`.
+- Picker URLs are used for previews and edit-form hydration, but the persisted user image fields are path-based.
+- User API edit payloads now return derived `profile_image_url` and `additional_image_urls` from configured file-manager disk URL.
+- User table avatar thumbnails now prefer the new profile image path URL and fall back to the legacy avatar URL.
+- Media usage tracking writes `media_id`, `model` (`App\Models\User`), `model_id`, and field names `profile_image_path` / `additional_image_paths` into `media_in_uses`.
+- Legacy avatar/document fields remain supported for compatibility.
+- `php artisan migrate` ran `2026_06_13_000011_add_profile_and_additional_image_fields_to_users_table`.
+- Added feature coverage proving profile/additional image paths are saved and tracked in `media_in_uses`.
+- `php artisan test --filter=UserManagementTest` passed with 9 tests and 29 assertions.
+- `php artisan test` passed with 26 tests and 165 assertions.
+- `npm run build` passed. Sass deprecation warnings remain from Bootstrap/import syntax, but the build exits successfully.
+
 ## Next Stage
 - Add a central dashboard-auth/login strategy when the real admin login surface is introduced; `dashboard.auth` can then redirect there instead of the frontend home route.
 - Optional: schedule `file-manager:prune-imports` in production once the retention window is confirmed.

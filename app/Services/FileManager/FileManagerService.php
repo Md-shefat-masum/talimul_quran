@@ -31,30 +31,48 @@ class FileManagerService
         $folderId = $folder?->id;
         $page = max(1, $page);
         $perPage = max(1, min(120, $perPage));
-        $query = trim(Str::lower($query));
+        $query = trim($query);
+        $offset = ($page - 1) * $perPage;
 
-        $folders = MediaFolder::query()
+        $folderQuery = MediaFolder::query()
             ->active()
             ->where('parent_id', $folderId ?: 0)
-            ->when($query !== '', fn ($builder) => $builder->where('name', 'like', '%'.$query.'%'))
-            ->orderBy('name')
-            ->get();
+            ->when($query !== '', fn ($builder) => $builder->where('name', 'like', '%'.$query.'%'));
 
-        $media = Media::query()
+        $mediaQuery = Media::query()
             ->active()
             ->where('media_folder_id', $folderId)
-            ->when($query !== '', fn ($builder) => $builder->where('filename', 'like', '%'.$query.'%'))
-            ->orderBy('filename')
-            ->get();
+            ->when($query !== '', fn ($builder) => $builder->where('filename', 'like', '%'.$query.'%'));
 
-        $items = collect($folders)
+        $folderTotal = (clone $folderQuery)->count();
+        $mediaTotal = (clone $mediaQuery)->count();
+        $total = $folderTotal + $mediaTotal;
+        $folders = collect();
+        $media = collect();
+
+        if ($offset < $folderTotal) {
+            $folders = (clone $folderQuery)
+                ->orderBy('name')
+                ->offset($offset)
+                ->limit($perPage)
+                ->get();
+        }
+
+        $remaining = $perPage - $folders->count();
+
+        if ($remaining > 0) {
+            $mediaOffset = max(0, $offset - $folderTotal);
+            $media = (clone $mediaQuery)
+                ->with('folder')
+                ->orderBy('filename')
+                ->offset($mediaOffset)
+                ->limit($remaining)
+                ->get();
+        }
+
+        $pagedItems = $folders
             ->map(fn (MediaFolder $mediaFolder): array => $this->buildDirectoryItem($mediaFolder))
-            ->merge(collect($media)->map(fn (Media $item): array => $this->buildFileItem($item)))
-            ->values();
-
-        $total = $items->count();
-        $pagedItems = $items
-            ->slice(($page - 1) * $perPage, $perPage)
+            ->merge($media->map(fn (Media $item): array => $this->buildFileItem($item)))
             ->values();
 
         return [

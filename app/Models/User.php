@@ -30,6 +30,8 @@ class User extends Authenticatable
         'phone',
         'avatar_url',
         'avatar_path',
+        'profile_image_path',
+        'additional_image_paths',
         'document_urls',
         'document_paths',
         'user_type_id',
@@ -58,9 +60,27 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'boolean',
+            'additional_image_paths' => 'array',
             'document_urls' => 'array',
             'document_paths' => 'array',
         ];
+    }
+
+    public function profileImageUrl(): ?string
+    {
+        return $this->publicMediaUrl($this->profile_image_path ?: $this->avatar_path);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function additionalImageUrls(): array
+    {
+        return collect($this->additional_image_paths ?: [])
+            ->map(fn (string $path): ?string => $this->publicMediaUrl($path))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function userType(): BelongsTo
@@ -71,5 +91,19 @@ class User extends Authenticatable
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    private function publicMediaUrl(?string $path): ?string
+    {
+        $path = trim((string) $path, '/');
+
+        if ($path === '') {
+            return null;
+        }
+
+        $disk = (string) config('file_manager.storage_disk', 'ftp');
+        $baseUrl = rtrim((string) config("filesystems.disks.{$disk}.url", ''), '/');
+
+        return $baseUrl !== '' ? $baseUrl.'/'.$path : null;
     }
 }

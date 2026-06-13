@@ -7,6 +7,7 @@ use App\Models\MediaFolder;
 use App\Models\MediaImport;
 use App\Models\MediaInUse;
 use App\Models\User;
+use App\Models\UserType;
 use App\Services\FileManager\FileManagerService;
 use App\Services\FileManager\MediaImportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,6 +83,79 @@ class FileManagerTest extends TestCase
             ->assertJsonPath('success', false)
             ->assertJsonPath('conflict.name', 'hero.jpg')
             ->assertJsonPath('conflict.suggested_file_name', 'hero-2.jpg');
+    }
+
+    public function test_user_type_permission_profiles_limit_actions_and_visibility(): void
+    {
+        $viewerType = UserType::query()->create([
+            'name' => 'Viewer',
+            'code' => 'viewer',
+            'status' => true,
+        ]);
+        $viewer = User::factory()->create([
+            'user_type_id' => $viewerType->id,
+        ]);
+
+        $this->actingAs($viewer)
+            ->getJson(route('backend.file-manager.index'))
+            ->assertOk()
+            ->assertJsonPath('data.permissions.read', true)
+            ->assertJsonPath('data.permissions.upload', false)
+            ->assertJsonPath('data.permissions.delete', false)
+            ->assertJsonPath('data.permissions.maintenance', false);
+
+        $this->actingAs($viewer)
+            ->postJson(route('backend.file-manager.photo.upload'), [
+                'photo' => UploadedFile::fake()->image('blocked.jpg', 80, 80),
+                'path' => 'uploads',
+            ])->assertForbidden()
+            ->assertJsonPath('ability', 'upload');
+    }
+
+    public function test_paginated_listing_spills_from_folders_into_files_without_loading_all_rows(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $uploads = $this->uploadsFolder();
+        MediaFolder::query()->create([
+            'name' => 'Alpha Folder',
+            'saved_name_into_storage' => 'alpha-folder',
+            'parent_id' => $uploads->id,
+            'status' => 1,
+        ]);
+        MediaFolder::query()->create([
+            'name' => 'Beta Folder',
+            'saved_name_into_storage' => 'beta-folder',
+            'parent_id' => $uploads->id,
+            'status' => 1,
+        ]);
+        $this->createMedia('uploads/alpha.jpg', $uploads, 'image/jpeg');
+        $this->createMedia('uploads/beta.jpg', $uploads, 'image/jpeg');
+
+        $firstPage = $this->getJson(route('backend.file-manager.index', [
+            'path' => 'uploads',
+            'page' => 1,
+            'per_page' => 3,
+        ]));
+
+        $firstPage->assertOk()
+            ->assertJsonPath('data.pagination.total', 4)
+            ->assertJsonPath('data.pagination.has_more', true)
+            ->assertJsonPath('data.items.0.name', 'Alpha Folder')
+            ->assertJsonPath('data.items.1.name', 'Beta Folder')
+            ->assertJsonPath('data.items.2.name', 'alpha.jpg');
+
+        $secondPage = $this->getJson(route('backend.file-manager.index', [
+            'path' => 'uploads',
+            'page' => 2,
+            'per_page' => 3,
+        ]));
+
+        $secondPage->assertOk()
+            ->assertJsonPath('data.pagination.total', 4)
+            ->assertJsonPath('data.pagination.has_more', false)
+            ->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.name', 'beta.jpg');
     }
 
     public function test_thumbnail_endpoint_generates_a_cached_jpeg_derivative(): void

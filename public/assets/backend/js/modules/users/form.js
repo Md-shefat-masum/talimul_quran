@@ -28,6 +28,10 @@
             phone: formData.get('phone'),
             avatar_url: formData.get('avatar_url'),
             avatar_path: formData.get('avatar_path'),
+            profile_image_url: formData.get('profile_image_url'),
+            profile_image_path: formData.get('profile_image_path'),
+            additional_image_urls: formData.get('additional_image_urls'),
+            additional_image_paths: formData.get('additional_image_paths'),
             document_urls: formData.get('document_urls'),
             document_paths: formData.get('document_paths'),
             user_type_id: formData.get('user_type_id'),
@@ -47,11 +51,11 @@
     }
 
     function getAvatarElements(form) {
-        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="avatar_url"]');
+        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="profile_image_url"]');
 
         return {
-            urlInput: form.querySelector('[name="avatar_url"]'),
-            pathInput: form.querySelector('[name="avatar_path"]'),
+            urlInput: form.querySelector('[name="profile_image_url"]'),
+            pathInput: form.querySelector('[name="profile_image_path"]'),
             displayInput: picker ? picker.querySelector('.js-file-manager-display') : null,
             preview: picker ? picker.querySelector('[data-file-manager-preview]') : null,
             trigger: picker ? picker.querySelector('[data-file-manager-target]') : null
@@ -65,7 +69,7 @@
 
         preview.innerHTML = url
             ? '<img src="' + url + '" alt="Selected avatar">'
-            : '<i class="mdi mdi-account-circle-outline"></i>';
+            : '<i class="mdi mdi-image-outline"></i>';
     }
 
     function setAvatar(form, url, path) {
@@ -111,15 +115,15 @@
         }
 
         elements.trigger.dataset.fileManagerOwnerId = user && user.id ? String(user.id) : '';
-        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' avatar' : 'User avatar';
+        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' profile image' : 'User profile image';
     }
 
     function getDocumentElements(form) {
-        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="document_urls"]');
+        var picker = form.querySelector('[data-file-manager-picker][data-picker-field="additional_image_urls"]');
 
         return {
-            urlInput: form.querySelector('[name="document_urls"]'),
-            pathInput: form.querySelector('[name="document_paths"]'),
+            urlInput: form.querySelector('[name="additional_image_urls"]'),
+            pathInput: form.querySelector('[name="additional_image_paths"]'),
             displayInput: picker ? picker.querySelector('.js-file-manager-display') : null,
             gallery: picker ? picker.querySelector('[data-file-manager-gallery]') : null,
             trigger: picker ? picker.querySelector('[data-file-manager-target]') : null
@@ -182,7 +186,7 @@
         }
 
         elements.trigger.dataset.fileManagerOwnerId = user && user.id ? String(user.id) : '';
-        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' documents' : 'User documents';
+        elements.trigger.dataset.fileManagerUsageLabel = user && user.name ? user.name + ' additional images' : 'User additional images';
     }
 
     function updateSubmitText(form, text) {
@@ -218,9 +222,9 @@
         form.querySelector('[name="name"]').value = user.name || '';
         form.querySelector('[name="email"]').value = user.email || '';
         form.querySelector('[name="phone"]').value = user.phone || '';
-        setAvatar(form, user.avatar_url || '', user.avatar_path || '');
+        setAvatar(form, user.profile_image_url || user.avatar_url || '', user.profile_image_path || user.avatar_path || '');
         setAvatarUsageContext(form, user);
-        setDocuments(form, user.document_urls || [], user.document_paths || []);
+        setDocuments(form, user.additional_image_urls || user.document_urls || [], user.additional_image_paths || user.document_paths || []);
         setDocumentUsageContext(form, user);
         form.querySelector('[name="status"]').value = String(user.status);
         form.querySelector('[name="password"]').value = '';
@@ -295,12 +299,12 @@
         });
 
         form.addEventListener('file-manager:selected', function (event) {
-            if (event.target && event.target.name === 'avatar_url') {
+            if (event.target && event.target.name === 'profile_image_url') {
                 syncAvatarFromSelection(form);
             }
         });
 
-        var clearAvatarButton = form.querySelector('[data-file-manager-picker][data-picker-field="avatar_url"] .js-file-manager-clear');
+        var clearAvatarButton = form.querySelector('[data-file-manager-picker][data-picker-field="profile_image_url"] .js-file-manager-clear');
         if (clearAvatarButton) {
             clearAvatarButton.addEventListener('click', function () {
                 setAvatar(form, '', '');

@@ -27,6 +27,7 @@
 <script src="{{ asset('assets/backend/js/file_manager/components/toolbar.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/components/item-actions.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/components/move-dialog.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/file_manager/components/delete-dialog.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/components/file-grid.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/components/details-panel.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/components/upload-panel.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
