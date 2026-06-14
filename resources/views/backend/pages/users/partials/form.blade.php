@@ -94,7 +94,13 @@
 
         <div class="col-md-6">
             <label class="form-label" for="{{ $formId }}-roles">Roles</label>
-            <select class="form-select" id="{{ $formId }}-roles" name="roles[]" multiple>
+            <select
+                class="form-select js-user-role-select"
+                id="{{ $formId }}-roles"
+                name="roles[]"
+                multiple
+                data-placeholder="Select one or more roles"
+            >
                 @foreach(($roles ?? []) as $role)
                     <option value="{{ $role->id }}" @selected(in_array($role->id, $selectedRoleIds, true))>
                         {{ $role->name }}
@@ -107,7 +113,7 @@
         <div class="col-md-6 d-flex align-items-end">
             <div class="user-form-tip w-100">
                 <i class="mdi mdi-information-outline me-1"></i>
-                Dynamic database options use AJAX Select2. Fixed options use a normal select.
+                Searchable selects help keep large user and role lists easy to scan.
             </div>
         </div>
 

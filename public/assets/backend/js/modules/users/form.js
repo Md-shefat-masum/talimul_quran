@@ -198,6 +198,27 @@
         }
     }
 
+    function initStaticSelect2(element, options) {
+        var $element = $(element);
+        var dropdownParent = $element.closest('.modal');
+        var config = {
+            width: '100%',
+            allowClear: Boolean(options.allowClear),
+            closeOnSelect: options.closeOnSelect !== false,
+            placeholder: options.placeholder || 'Select options'
+        };
+
+        if (dropdownParent.length) {
+            config.dropdownParent = dropdownParent;
+        }
+
+        if ($element.hasClass('select2-hidden-accessible')) {
+            $element.select2('destroy');
+        }
+
+        $element.select2(config);
+    }
+
     function reset(form) {
         form.reset();
         form.dataset.mode = 'create';
@@ -293,6 +314,15 @@
                 url: form.dataset.userTypeOptionsUrl,
                 placeholder: userTypeSelect.dataset.placeholder,
                 allowClear: false
+            });
+        }
+
+        var roleSelect = form.querySelector('.js-user-role-select');
+        if (roleSelect) {
+            initStaticSelect2(roleSelect, {
+                placeholder: roleSelect.dataset.placeholder,
+                allowClear: true,
+                closeOnSelect: false
             });
         }
 

@@ -1250,6 +1250,66 @@
     box-shadow: 0 0 0 0.2rem var(--user-form-focus-ring);
 }
 
+.user-form-component .select2-container .select2-selection--multiple {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 0.24rem 0.35rem;
+    background: #ffffff;
+    border: 1px solid var(--user-form-border);
+    border-radius: 7px;
+    box-shadow: none;
+}
+
+.user-form-component .select2-container--default.select2-container--focus .select2-selection--multiple,
+.user-form-component .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--user-form-focus);
+    box-shadow: 0 0 0 0.2rem var(--user-form-focus-ring);
+}
+
+.user-form-component .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding: 0;
+}
+
+.user-form-component .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.22rem;
+    margin: 0;
+    padding: 0.28rem 0.55rem;
+    color: var(--um-teal-800);
+    background: var(--um-teal-50);
+    border: 1px solid var(--um-teal-200);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.user-form-component .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    position: static;
+    order: 2;
+    color: var(--um-teal-700);
+    border: 0;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.user-form-component .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #d93444;
+    background: transparent;
+}
+
+.user-form-component .select2-container--default .select2-search--inline .select2-search__field {
+    min-height: 28px;
+    margin: 0;
+    color: var(--user-form-text);
+    font-size: 0.87rem;
+}
+
 /* ------------------------------------------------------------------------
  * Modal form
  * --------------------------------------------------------------------- */
