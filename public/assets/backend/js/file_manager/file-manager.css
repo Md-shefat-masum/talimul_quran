@@ -73,6 +73,86 @@
     box-shadow: var(--fm-shadow);
 }
 
+.file-manager-page-shell {
+    display: grid;
+    gap: 1rem;
+}
+
+.file-manager-page-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #d8ebe8;
+    border-radius: 8px;
+    box-shadow: 0 14px 34px rgba(7, 80, 78, 0.08);
+}
+
+.file-manager-page-hero__eyebrow {
+    color: var(--fm-teal-700);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.file-manager-page-hero__subtitle {
+    max-width: 680px;
+    margin: 0.28rem 0 0;
+    color: var(--fm-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.fm-page-frame {
+    width: 100%;
+    min-height: 640px;
+    height: calc(100vh - 225px);
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    overflow: hidden;
+    color: var(--fm-ink);
+    background: var(--fm-surface);
+    border: 1px solid rgba(216, 235, 232, 0.95);
+    border-radius: 8px;
+    box-shadow: var(--fm-shadow);
+}
+
+.fm-page-frame .fm-tree-panel {
+    max-height: none;
+}
+
+.fm-page-frame .fm-sidebar {
+    max-height: none;
+}
+
+.fm-page-frame .fm-browser-layout {
+    min-height: 0;
+}
+
+.fm-page-frame .fm-selection-count {
+    gap: 0.45rem;
+}
+
+.fm-page-frame .fm-selection-count button {
+    min-height: 26px;
+    padding: 0.15rem 0.5rem;
+    color: var(--fm-teal-800);
+    background: var(--fm-teal-50);
+    border: 1px solid var(--fm-border);
+    border-radius: 7px;
+    font-size: 0.72rem;
+    font-weight: 900;
+}
+
+.fm-page-frame .fm-selection-count button:hover {
+    color: #ffffff;
+    background: var(--fm-teal-700);
+    border-color: var(--fm-teal-700);
+}
+
 .fm-sidebar {
     min-height: 0;
     display: flex;
@@ -1798,6 +1878,12 @@
         height: min(820px, calc(100vh - 1rem));
     }
 
+    .fm-page-frame {
+        grid-template-columns: 1fr;
+        min-height: 620px;
+        height: calc(100vh - 220px);
+    }
+
     .fm-sidebar {
         display: none;
     }
@@ -1816,6 +1902,15 @@
 }
 
 @media (max-width: 767.98px) {
+    .file-manager-page-hero {
+        padding: 0.95rem;
+    }
+
+    .fm-page-frame {
+        min-height: 680px;
+        height: auto;
+    }
+
     .fm-overlay {
         align-items: stretch;
         padding: 0.5rem;

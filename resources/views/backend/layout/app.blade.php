@@ -40,7 +40,9 @@
     </div>
 </div>
 
-<file-manager></file-manager>
+@unless(request()->routeIs('backend.file-manager.index'))
+    <file-manager></file-manager>
+@endunless
 
 @include('backend.layout.includes.scripts')
 @stack('scripts')

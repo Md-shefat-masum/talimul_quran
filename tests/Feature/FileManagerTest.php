@@ -19,6 +19,17 @@ class FileManagerTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_file_manager_sidebar_route_opens_full_page_workspace(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('backend.file-manager.index'))
+            ->assertOk()
+            ->assertSee('File Manager')
+            ->assertSee('<file-manager-page></file-manager-page>', false)
+            ->assertDontSee('<file-manager></file-manager>', false);
+    }
+
     public function test_file_manager_list_is_paginated_searchable_and_returns_thumbnail_urls(): void
     {
         $this->actingAs(User::factory()->create());
@@ -40,7 +51,7 @@ class FileManagerTest extends TestCase
         $this->createMedia('uploads/beta.jpg', $uploads, 'image/jpeg');
         $this->createMedia('uploads/gamma.txt', $uploads, 'text/plain');
 
-        $response = $this->getJson(route('backend.file-manager.index', [
+        $response = $this->getJson(route('backend.file-manager.list', [
             'path' => 'uploads',
             'page' => 1,
             'per_page' => 3,
@@ -52,7 +63,7 @@ class FileManagerTest extends TestCase
             ->assertJsonPath('data.pagination.has_more', true)
             ->assertJsonCount(3, 'data.items');
 
-        $searchResponse = $this->getJson(route('backend.file-manager.index', [
+        $searchResponse = $this->getJson(route('backend.file-manager.list', [
             'path' => 'uploads',
             'q' => 'alp',
         ]));
@@ -160,7 +171,7 @@ class FileManagerTest extends TestCase
         ]);
 
         $this->actingAs($viewer)
-            ->getJson(route('backend.file-manager.index'))
+            ->getJson(route('backend.file-manager.list'))
             ->assertOk()
             ->assertJsonPath('data.permissions.read', true)
             ->assertJsonPath('data.permissions.upload', false)
@@ -195,7 +206,7 @@ class FileManagerTest extends TestCase
         $this->createMedia('uploads/alpha.jpg', $uploads, 'image/jpeg');
         $this->createMedia('uploads/beta.jpg', $uploads, 'image/jpeg');
 
-        $firstPage = $this->getJson(route('backend.file-manager.index', [
+        $firstPage = $this->getJson(route('backend.file-manager.list', [
             'path' => 'uploads',
             'page' => 1,
             'per_page' => 3,
@@ -208,7 +219,7 @@ class FileManagerTest extends TestCase
             ->assertJsonPath('data.items.1.name', 'Beta Folder')
             ->assertJsonPath('data.items.2.name', 'alpha.jpg');
 
-        $secondPage = $this->getJson(route('backend.file-manager.index', [
+        $secondPage = $this->getJson(route('backend.file-manager.list', [
             'path' => 'uploads',
             'page' => 2,
             'per_page' => 3,
@@ -282,7 +293,7 @@ class FileManagerTest extends TestCase
 
     public function test_file_manager_routes_require_authenticated_users(): void
     {
-        $this->getJson(route('backend.file-manager.index'))->assertUnauthorized();
+        $this->getJson(route('backend.file-manager.list'))->assertUnauthorized();
         $this->getJson(route('backend.file-manager.thumbnail-cache'))->assertUnauthorized();
         $this->deleteJson(route('backend.file-manager.thumbnail-cache.clear'))->assertUnauthorized();
     }
@@ -307,7 +318,7 @@ class FileManagerTest extends TestCase
             'status' => 1,
         ]);
 
-        $this->getJson(route('backend.file-manager.index', [
+        $this->getJson(route('backend.file-manager.list', [
             'folder_id' => $uploads->id,
         ]))->assertOk()
             ->assertJsonPath('data.permissions.read', true)
@@ -368,7 +379,7 @@ class FileManagerTest extends TestCase
             'rename' => true,
         ], $uploads->refresh()->permission_overrides);
 
-        $this->getJson(route('backend.file-manager.index', [
+        $this->getJson(route('backend.file-manager.list', [
             'folder_id' => $uploads->id,
         ]))->assertOk()
             ->assertJsonPath('data.permissions.upload', false)

@@ -14,6 +14,7 @@ use App\Services\FileManager\FileManagerUsageService;
 use App\Services\FileManager\MediaImportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
 class FileManagerController extends Controller
@@ -24,6 +25,11 @@ class FileManagerController extends Controller
         private readonly FileManagerPermissionService $permissionService,
         private readonly MediaImportService $mediaImportService,
     ) {
+    }
+
+    public function page(): View
+    {
+        return view('backend.pages.file-manager.index');
     }
 
     public function index(Request $request): JsonResponse

@@ -3,7 +3,7 @@
 
     window.FileManagerConfig = {
         endpoints: {
-            list: '/dashboard/file-manager',
+            list: '/dashboard/file-manager/list',
             tree: '/dashboard/file-manager/tree',
             uploadPhoto: '/dashboard/file-manager/photo',
             folder: '/dashboard/file-manager/folder',

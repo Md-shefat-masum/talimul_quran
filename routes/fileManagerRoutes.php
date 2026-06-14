@@ -7,7 +7,8 @@ Route::prefix('dashboard/file-manager')
     ->name('backend.file-manager.')
     ->middleware(['file-manager.auth'])
     ->group(function (): void {
-        Route::get('/', [FileManagerController::class, 'index'])->name('index');
+        Route::get('/', [FileManagerController::class, 'page'])->name('index');
+        Route::get('list', [FileManagerController::class, 'index'])->name('list');
         Route::get('tree', [FileManagerController::class, 'tree'])->name('tree');
         Route::get('preview', [FileManagerController::class, 'preview'])->name('preview');
         Route::get('thumbnail', [FileManagerController::class, 'thumbnail'])->name('thumbnail');
