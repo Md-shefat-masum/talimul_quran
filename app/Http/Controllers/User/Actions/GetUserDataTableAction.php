@@ -59,6 +59,7 @@ class GetUserDataTableAction
                 'avatar_url' => $user->profileImageUrl() ?: $user->avatar_url,
                 'document_count' => count($user->additional_image_paths ?: $user->document_urls ?: []),
                 'user_type' => $user->userType?->name ?: 'Not assigned',
+                'roles' => $user->roles->pluck('name')->implode(', ') ?: 'No role',
                 'status' => $user->status ? 1 : 0,
                 'status_label' => $user->status ? 'Active' : 'Inactive',
                 'created_at' => $user->created_at?->format('d M Y, h:i A'),

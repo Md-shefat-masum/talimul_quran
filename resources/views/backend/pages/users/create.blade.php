@@ -38,6 +38,7 @@
                         'mode' => 'create',
                         'context' => 'page',
                         'user' => null,
+                        'roles' => $roles,
                         'submitText' => 'Create User',
                     ])
                 </div>

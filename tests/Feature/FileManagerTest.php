@@ -64,6 +64,69 @@ class FileManagerTest extends TestCase
         $this->assertNotNull($searchResponse->json('data.items.0.thumbnail_url'));
     }
 
+    public function test_file_manager_tree_returns_lazy_loaded_active_folder_children(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $uploads = $this->uploadsFolder();
+        $theme = MediaFolder::query()->create([
+            'name' => 'theme',
+            'saved_name_into_storage' => 'theme',
+            'parent_id' => $uploads->id,
+            'status' => 1,
+        ]);
+        $js = MediaFolder::query()->create([
+            'name' => 'js',
+            'saved_name_into_storage' => 'js',
+            'parent_id' => $theme->id,
+            'status' => 1,
+        ]);
+        MediaFolder::query()->create([
+            'name' => 'accounts',
+            'saved_name_into_storage' => 'accounts',
+            'parent_id' => $js->id,
+            'status' => 1,
+        ]);
+        MediaFolder::query()->create([
+            'name' => 'Hidden',
+            'saved_name_into_storage' => 'hidden',
+            'parent_id' => $uploads->id,
+            'status' => 0,
+        ]);
+
+        $response = $this->getJson(route('backend.file-manager.tree'));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.0.name', 'uploads')
+            ->assertJsonPath('data.0.path', 'uploads')
+            ->assertJsonPath('data.0.has_children', true)
+            ->assertJsonPath('data.0.children_loaded', false)
+            ->assertJsonPath('data.0.children', [])
+            ->assertJsonMissingPath('data.1');
+
+        $uploadsResponse = $this->getJson(route('backend.file-manager.tree', [
+            'path' => 'uploads',
+        ]));
+
+        $uploadsResponse->assertOk()
+            ->assertJsonPath('data.0.name', 'theme')
+            ->assertJsonPath('data.0.path', 'uploads/theme')
+            ->assertJsonPath('data.0.has_children', true)
+            ->assertJsonPath('data.0.children', [])
+            ->assertJsonMissingPath('data.1');
+
+        $themeResponse = $this->getJson(route('backend.file-manager.tree', [
+            'folder_id' => $theme->id,
+        ]));
+
+        $themeResponse->assertOk()
+            ->assertJsonPath('data.0.name', 'js')
+            ->assertJsonPath('data.0.path', 'uploads/theme/js')
+            ->assertJsonPath('data.0.has_children', true)
+            ->assertJsonPath('data.0.children', []);
+    }
+
     public function test_upload_can_stop_on_duplicate_filename_and_suggest_a_safe_name(): void
     {
         $this->actingAs(User::factory()->create());

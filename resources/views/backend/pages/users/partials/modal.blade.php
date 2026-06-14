@@ -15,6 +15,7 @@
                     'mode' => 'create',
                     'context' => 'modal',
                     'user' => null,
+                    'roles' => $roles ?? [],
                     'submitText' => 'Save User',
                 ])
             </div>

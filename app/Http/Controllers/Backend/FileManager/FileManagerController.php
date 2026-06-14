@@ -83,6 +83,24 @@ class FileManagerController extends Controller
         }
     }
 
+    public function tree(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'path' => ['nullable', 'string', 'max:500'],
+            'folder_id' => ['nullable', 'integer', 'min:1'],
+        ]);
+        $folder = $this->folderFromIdentifier((string) ($validated['folder_id'] ?? $validated['path'] ?? ''));
+
+        if ($response = $this->denyUnlessAllowed($request, 'read', $folder)) {
+            return $response;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->fileManagerService->tree((string) ($validated['folder_id'] ?? $validated['path'] ?? '')),
+        ]);
+    }
+
     public function uploadPhoto(UploadPhotoRequest $request): JsonResponse
     {
         $folder = $this->folderFromIdentifier((string) ($request->input('folder_id') ?: $request->input('path', '')), true);

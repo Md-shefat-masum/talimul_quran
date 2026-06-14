@@ -11,6 +11,7 @@
 <script src="{{ asset('assets/backend/js/common/alert-helper.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/common/form-error-helper.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/common/select2-axios.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
+<script src="{{ asset('assets/backend/js/modules/sidebar.js') }}?v={{ env('APP_VERSION', '1.0.0') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/vendor/vue.global.prod.js') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/vendor/vue-demi.iife.js') }}"></script>
 <script src="{{ asset('assets/backend/js/file_manager/vendor/pinia.iife.prod.js') }}"></script>

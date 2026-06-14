@@ -1,33 +1,65 @@
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
-    <ul class="nav">
-        <li class="nav-item sidebar-user-actions">
-            <div class="user-details">
-                <div class="d-flex align-items-center">
-                    <div class="sidebar-profile-img">
-                        <img src="{{ asset('assets/backend/images/default-avatar.svg') }}" alt="User avatar">
-                    </div>
-                    <div class="sidebar-profile-text">
-                        <p class="mb-1">{{ auth()->user()?->name ?? 'Admin User' }}</p>
-                        <small class="text-muted">Dashboard access</small>
-                    </div>
-                </div>
+@php
+    use App\Support\Permissions\PermissionRegistry;
+    use App\Support\Sidebar\SidebarMenuBuilder;
+
+    $sidebarUser = auth()->user();
+    $sidebarUser?->loadMissing('roles:id,name,slug');
+    $sidebarMenus = SidebarMenuBuilder::build(PermissionRegistry::modules(), $sidebarUser);
+    $primaryRole = $sidebarUser?->roles?->first()?->name ?? 'No Role';
+    $profileImage = $sidebarUser?->profileImageUrl() ?: asset('assets/backend/images/default-avatar.svg');
+    $displayId = $sidebarUser ? 'ID #A'.str_pad((string) $sidebarUser->id, 4, '0', STR_PAD_LEFT) : 'ID #A0000';
+@endphp
+
+<nav class="sidebar sidebar-offcanvas permission-sidebar" id="sidebar" data-sidebar-root>
+    <div class="left_sidebar_profile_info">
+        <div class="sidebar-profile-card">
+            <a href="{{ route('backend.profile.edit') }}" class="sidebar-profile-card__menu" aria-label="Profile settings">
+                <i class="mdi mdi-dots-vertical"></i>
+            </a>
+            <div class="sidebar-profile-card__avatar">
+                <img src="{{ $profileImage }}" alt="User avatar">
             </div>
-        </li>
+            <h4>{{ $sidebarUser?->name ?? 'Admin User' }}</h4>
+            <span>{{ $primaryRole }}</span>
+            <p>{{ $sidebarUser?->email ?? $displayId }}</p>
+        </div>
+    </div>
 
-        <li class="nav-item nav-category">Main</li>
-        <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('dashboard') }}">
-                <span class="icon-bg"><i class="mdi mdi-view-dashboard-outline menu-icon"></i></span>
-                <span class="menu-title">Dashboard</span>
-            </a>
-        </li>
+    <div class="permission_menues">
+        <p class="permission_menues__label">Main Menu</p>
+        <ul class="sidebar-tree" role="tree">
+            @foreach($sidebarMenus as $menu)
+                @include('backend.layout.includes.sidebar-item', [
+                    'menu' => $menu,
+                    'level' => 0,
+                ])
+            @endforeach
+        </ul>
+    </div>
 
-        <li class="nav-item nav-category">Management</li>
-        <li class="nav-item {{ request()->routeIs('backend.users.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('backend.users.index') }}">
-                <span class="icon-bg"><i class="mdi mdi-account-group-outline menu-icon"></i></span>
-                <span class="menu-title">User Management</span>
-            </a>
-        </li>
-    </ul>
+    <div class="right_sidebar_bottom_fixed_menus">
+        <ul>
+            <li>
+                <a href="{{ route('backend.profile.edit') }}" @class(['is-active' => request()->routeIs('backend.profile.*')])>
+                    <i class="mdi mdi-account-circle-outline"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('backend.profile.edit') }}">
+                    <i class="mdi mdi-cog-outline"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit">
+                        <i class="mdi mdi-logout"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
 </nav>

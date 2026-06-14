@@ -38,6 +38,7 @@
                         'mode' => 'edit',
                         'context' => 'page',
                         'user' => $user,
+                        'roles' => $roles,
                         'submitText' => 'Update User',
                     ])
                 </div>

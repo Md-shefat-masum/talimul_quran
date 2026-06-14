@@ -2,17 +2,27 @@
 
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Frontend\PagesController;
+use App\Http\Controllers\User\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => ''], function () {
     Route::get('/', [PagesController::class, 'home'])->name('home');
 });
 
-Route::group(['prefix' => 'dashboard'], function () {
+Route::group(['prefix' => 'dashboard', 'middleware' => ['dashboard.auth', 'can:dashboard.view']], function () {
     Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 });
 
+Route::prefix('dashboard')
+    ->name('backend.')
+    ->middleware(['dashboard.auth'])
+    ->group(function (): void {
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
+    });
+
 /* Domain route files are loaded here. Keep business logic out of web.php. */
+require __DIR__ . '/roleRoutes.php';
 require __DIR__ . '/userRoutes.php';
 require __DIR__ . '/fileManagerRoutes.php';
 

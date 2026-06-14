@@ -3,10 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Role;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -86,6 +89,32 @@ class User extends Authenticatable
     public function userType(): BelongsTo
     {
         return $this->belongsTo(UserType::class);
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class)->withTimestamps();
+    }
+
+    public function hasRole(string $slug): bool
+    {
+        try {
+            return $this->roles()->active()->where('slug', $slug)->exists();
+        } catch (QueryException) {
+            return false;
+        }
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        try {
+            return $this->roles()
+                ->active()
+                ->whereJsonContains('permissions', $permission)
+                ->exists();
+        } catch (QueryException) {
+            return false;
+        }
     }
 
     public function scopeActive(Builder $query): Builder

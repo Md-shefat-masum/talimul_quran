@@ -4,6 +4,7 @@
     window.FileManagerConfig = {
         endpoints: {
             list: '/dashboard/file-manager',
+            tree: '/dashboard/file-manager/tree',
             uploadPhoto: '/dashboard/file-manager/photo',
             folder: '/dashboard/file-manager/folder',
             usage: '/dashboard/file-manager/usage',

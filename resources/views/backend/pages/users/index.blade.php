@@ -138,6 +138,7 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>User Type</th>
+                        <th>Roles</th>
                         <th>Status</th>
                         <th>Created</th>
                         <th class="text-end">Actions</th>

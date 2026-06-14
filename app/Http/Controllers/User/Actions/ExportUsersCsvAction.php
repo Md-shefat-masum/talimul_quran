@@ -19,7 +19,7 @@ class ExportUsersCsvAction
         return response()->streamDownload(function () use ($filters): void {
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, ['ID', 'Name', 'Email', 'Phone', 'User Type', 'Status', 'Created At']);
+            fputcsv($handle, ['ID', 'Name', 'Email', 'Phone', 'User Type', 'Roles', 'Status', 'Created At']);
 
             $this->buildUserListQueryAction
                 ->execute($filters)
@@ -33,6 +33,7 @@ class ExportUsersCsvAction
                             $user->email,
                             $user->phone,
                             $user->userType?->name,
+                            $user->roles->pluck('name')->implode(', '),
                             $user->status ? 'Active' : 'Inactive',
                             $user->created_at?->format('Y-m-d H:i:s'),
                         ]);

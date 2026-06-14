@@ -43,6 +43,11 @@
                 importHistory: [],
                 importHistoryLoading: false,
                 importingMedia: false,
+                directoryTree: [],
+                directoryTreeLoading: false,
+                directoryTreeQuery: '',
+                treeExpanded: {},
+                treeLoadingPaths: {},
                 recentFolders: [],
                 moveDialog: {
                     isOpen: false,
@@ -197,6 +202,7 @@
                 this.error = '';
                 this.isOpen = true;
                 this.mode = options.mode || 'browse';
+                this.loadDirectoryTree('', true);
                 this.load(options.path || this.path || window.FileManagerConfig.defaults.path, 1).then(function () {
                     if (!store.canMaintenance) {
                         return null;
@@ -238,6 +244,7 @@
                     store.items = append ? store.items.concat(data.items || []) : (data.items || []);
                     store.applyPagination(data.pagination);
                     store.permissions = Object.assign({}, store.permissions, data.permissions || {});
+                    store.ensureTreePath(store.path);
                     if (!append) {
                         store.selected = [];
                         store.activeItem = null;
@@ -276,6 +283,150 @@
                 this.queryTimer = setTimeout(function () {
                     store.load(store.path, 1);
                 }, 260);
+            },
+
+            treeNode: function (path, nodes) {
+                var found = null;
+
+                (nodes || this.directoryTree || []).some(function (node) {
+                    if (node.path === path) {
+                        found = node;
+                        return true;
+                    }
+
+                    found = this.treeNode(path, node.children || []);
+                    return Boolean(found);
+                }, this);
+
+                return found;
+            },
+
+            replaceTreeNode: function (nodes, path, updater) {
+                return (nodes || []).map(function (node) {
+                    if (node.path === path) {
+                        return updater(node);
+                    }
+
+                    return Object.assign({}, node, {
+                        children: this.replaceTreeNode(node.children || [], path, updater)
+                    });
+                }, this);
+            },
+
+            setTreeLoading: function (path, loading) {
+                var next = Object.assign({}, this.treeLoadingPaths);
+
+                if (loading) {
+                    next[path || 'root'] = true;
+                } else {
+                    delete next[path || 'root'];
+                }
+
+                this.treeLoadingPaths = next;
+            },
+
+            isTreeLoading: function (path) {
+                return Boolean(this.treeLoadingPaths[path || 'root']);
+            },
+
+            loadDirectoryTree: function (parent, refresh) {
+                var store = this;
+                var parentNode = typeof parent === 'string' ? store.treeNode(parent) : (parent || null);
+                var parentPath = typeof parent === 'string' ? parent : (parentNode && parentNode.path ? parentNode.path : '');
+
+                if (!store.canRead) {
+                    return Promise.resolve([]);
+                }
+
+                if (parentPath && parentNode && parentNode.children_loaded && !refresh) {
+                    return Promise.resolve(parentNode.children || []);
+                }
+
+                store.directoryTreeLoading = true;
+                store.setTreeLoading(parentPath, true);
+
+                return window.FileManagerApi.tree({path: parentPath}).then(function (items) {
+                    items = items || [];
+
+                    if (parentPath === '') {
+                        store.directoryTree = items;
+                    } else {
+                        store.directoryTree = store.replaceTreeNode(store.directoryTree, parentPath, function (node) {
+                            return Object.assign({}, node, {
+                                children: items,
+                                children_loaded: true,
+                                children_count: items.length,
+                                has_children: items.length > 0
+                            });
+                        });
+                    }
+
+                    return items;
+                }).catch(function (error) {
+                    store.error = error.response && error.response.data && error.response.data.message
+                        ? error.response.data.message
+                        : 'Could not load the folder tree.';
+                    return [];
+                }).finally(function () {
+                    store.directoryTreeLoading = false;
+                    store.setTreeLoading(parentPath, false);
+                });
+            },
+
+            refreshDirectoryTree: function () {
+                var store = this;
+                var currentPath = store.path || '';
+
+                store.directoryTree = [];
+                store.treeExpanded = {};
+
+                return store.loadDirectoryTree('', true).then(function () {
+                    return store.ensureTreePath(currentPath);
+                });
+            },
+
+            setDirectoryTreeQuery: function (query) {
+                this.directoryTreeQuery = query || '';
+            },
+
+            toggleTreeFolder: function (path) {
+                var key = path || '';
+                var next = {};
+                var opening = !this.treeExpanded[key];
+                var node = this.treeNode(key);
+
+                next[key] = opening;
+                this.treeExpanded = Object.assign({}, this.treeExpanded, next);
+
+                if (opening && node && node.has_children && !node.children_loaded) {
+                    this.loadDirectoryTree(node);
+                }
+            },
+
+            ensureTreePath: function (path) {
+                var segments = (path || '').split('/').filter(Boolean);
+                var store = this;
+                var next = Object.assign({}, this.treeExpanded);
+                var current = '';
+                var chain = store.directoryTree.length ? Promise.resolve() : store.loadDirectoryTree('', true);
+
+                segments.forEach(function (segment) {
+                    current = current ? current + '/' + segment : segment;
+                    next[current] = true;
+                    var pathAtDepth = current;
+                    chain = chain.then(function () {
+                        var node = store.treeNode(pathAtDepth);
+
+                        if (!node || !node.has_children || node.children_loaded) {
+                            return null;
+                        }
+
+                        return store.loadDirectoryTree(node);
+                    });
+                });
+
+                this.treeExpanded = next;
+                return chain;
             },
 
             openFolder: function (item) {
@@ -390,6 +541,7 @@
                     store.importSummary = summary;
                     return Promise.all([
                         store.load(store.path, 1),
+                        store.refreshDirectoryTree(),
                         store.loadImportHistory()
                     ]).then(function () {
                         return summary;
@@ -481,7 +633,10 @@
                 store.saving = true;
 
                 return window.FileManagerApi.createFolder(store.path, name, store.currentFolderId).then(function () {
-                    return store.load(store.path, 1);
+                    return Promise.all([
+                        store.load(store.path, 1),
+                        store.refreshDirectoryTree()
+                    ]);
                 }).finally(function () {
                     store.saving = false;
                 });
@@ -503,7 +658,10 @@
                 store.error = '';
 
                 return window.FileManagerApi.rename(item, name).then(function (updatedItem) {
-                    return store.load(store.path, 1).then(function () {
+                    return Promise.all([
+                        store.load(store.path, 1),
+                        store.refreshDirectoryTree()
+                    ]).then(function () {
                         store.activeItem = updatedItem;
                         store.selected = updatedItem.type === 'file' ? [updatedItem] : [];
                         return updatedItem;
@@ -534,7 +692,10 @@
                 store.error = '';
 
                 return window.FileManagerApi.move(item, destination || '').then(function (updatedItem) {
-                    return store.load(store.path, 1).then(function () {
+                    return Promise.all([
+                        store.load(store.path, 1),
+                        store.refreshDirectoryTree()
+                    ]).then(function () {
                         store.activeItem = store.items.some(function (currentItem) {
                             return store.sameItem(currentItem, updatedItem);
                         }) ? updatedItem : null;
@@ -754,7 +915,10 @@
                     });
                     store.activeItem = updatedItem;
 
-                    return store.load(store.path, 1).then(function () {
+                    return Promise.all([
+                        store.load(store.path, 1),
+                        store.refreshDirectoryTree()
+                    ]).then(function () {
                         store.activeItem = updatedItem;
                         return updatedItem;
                     });
@@ -779,7 +943,10 @@
                 store.saving = true;
 
                 return window.FileManagerApi.destroy(item, force).then(function () {
-                    return store.load(store.path, 1);
+                    return Promise.all([
+                        store.load(store.path, 1),
+                        store.refreshDirectoryTree()
+                    ]);
                 }).catch(function (error) {
                     var usage = error.response && error.response.data ? error.response.data.usage : null;
                     var count = usage && usage.count ? usage.count : 0;

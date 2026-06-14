@@ -35,6 +35,7 @@
             document_urls: formData.get('document_urls'),
             document_paths: formData.get('document_paths'),
             user_type_id: formData.get('user_type_id'),
+            roles: formData.getAll('roles[]'),
             status: formData.get('status'),
             password: formData.get('password'),
             password_confirmation: formData.get('password_confirmation')
@@ -209,6 +210,7 @@
 
         var userType = $(form).find('.js-user-type-select');
         userType.val(null).trigger('change');
+        $(form).find('[name="roles[]"]').val([]).trigger('change');
 
         setModalTitle(form, 'Create User');
         updateSubmitText(form, 'Save User');
@@ -227,6 +229,7 @@
         setDocuments(form, user.additional_image_urls || user.document_urls || [], user.additional_image_paths || user.document_paths || []);
         setDocumentUsageContext(form, user);
         form.querySelector('[name="status"]').value = String(user.status);
+        $(form).find('[name="roles[]"]').val(user.role_ids || []).trigger('change');
         form.querySelector('[name="password"]').value = '';
         form.querySelector('[name="password_confirmation"]').value = '';
 

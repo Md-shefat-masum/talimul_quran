@@ -13,7 +13,7 @@ class BuildUserListQueryAction
      */
     public function execute(array $filters = []): Builder
     {
-        $query = User::query()->with('userType:id,name');
+        $query = User::query()->with(['userType:id,name', 'roles:id,name']);
 
         $search = trim((string) ($filters['search'] ?? ''));
         if ($search !== '') {

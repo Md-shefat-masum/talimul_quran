@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Media;
 use App\Models\MediaFolder;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserType;
+use App\Support\Permissions\PermissionRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +17,7 @@ class UserManagementTest extends TestCase
 
     public function test_authenticated_user_can_open_user_management_page(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
 
         $response = $this->actingAs($admin)->get(route('backend.users.index'));
 
@@ -38,10 +40,16 @@ class UserManagementTest extends TestCase
 
     public function test_user_can_be_created_with_valid_data(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
         $type = UserType::query()->create([
             'name' => 'Staff',
             'code' => 'staff',
+            'status' => true,
+        ]);
+        $role = Role::query()->create([
+            'name' => 'Editor',
+            'slug' => 'editor',
+            'permissions' => ['dashboard.view', 'users.view'],
             'status' => true,
         ]);
 
@@ -50,6 +58,7 @@ class UserManagementTest extends TestCase
             'email' => 'example@example.com',
             'phone' => '01700000000',
             'user_type_id' => $type->id,
+            'roles' => [$role->id],
             'status' => 1,
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -58,11 +67,12 @@ class UserManagementTest extends TestCase
         $response->assertCreated();
         $response->assertJsonPath('success', true);
         $this->assertDatabaseHas('users', ['email' => 'example@example.com']);
+        $this->assertTrue(User::query()->where('email', 'example@example.com')->firstOrFail()->roles->contains('id', $role->id));
     }
 
     public function test_user_documents_can_be_saved_and_tracked_from_multiple_picker(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
         $type = UserType::query()->create([
             'name' => 'Teacher',
             'code' => 'teacher',
@@ -136,7 +146,7 @@ class UserManagementTest extends TestCase
 
     public function test_user_profile_and_additional_images_save_paths_and_track_media(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
         $type = UserType::query()->create([
             'name' => 'Teacher',
             'code' => 'teacher',
@@ -229,7 +239,7 @@ class UserManagementTest extends TestCase
 
     public function test_blank_password_does_not_replace_existing_password_during_update(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
         $type = UserType::query()->create([
             'name' => 'Manager',
             'code' => 'manager',
@@ -256,7 +266,7 @@ class UserManagementTest extends TestCase
 
     public function test_logged_in_user_cannot_delete_own_account(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
 
         $response = $this->actingAs($admin)->deleteJson(route('backend.users.destroy', $admin));
 
@@ -266,7 +276,7 @@ class UserManagementTest extends TestCase
 
     public function test_user_type_select2_endpoint_returns_expected_shape(): void
     {
-        $admin = User::factory()->create();
+        $admin = $this->adminUser();
         UserType::query()->create([
             'name' => 'Operator',
             'code' => 'operator',
@@ -280,5 +290,21 @@ class UserManagementTest extends TestCase
             'results' => [['id', 'text']],
             'pagination' => ['more'],
         ]);
+    }
+
+    private function adminUser(): User
+    {
+        $role = Role::query()->create([
+            'name' => 'Super Admin',
+            'slug' => 'super-admin-'.Role::query()->count(),
+            'permissions' => PermissionRegistry::keys(),
+            'is_system' => true,
+            'status' => true,
+        ]);
+
+        $user = User::factory()->create();
+        $user->roles()->attach($role);
+
+        return $user;
     }
 }

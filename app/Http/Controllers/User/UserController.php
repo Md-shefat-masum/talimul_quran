@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\User\Services\UserService;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,9 @@ class UserController extends Controller
 
     public function index(): View
     {
-        return view('backend.pages.users.index');
+        return view('backend.pages.users.index', [
+            'roles' => $this->activeRoles(),
+        ]);
     }
 
     public function data(Request $request): JsonResponse
@@ -33,6 +36,7 @@ class UserController extends Controller
     {
         return view('backend.pages.users.create', [
             'user' => null,
+            'roles' => $this->activeRoles(),
         ]);
     }
 
@@ -58,7 +62,8 @@ class UserController extends Controller
     public function edit(User $user): View
     {
         return view('backend.pages.users.edit', [
-            'user' => $user->loadMissing('userType:id,name'),
+            'user' => $user->loadMissing(['userType:id,name', 'roles:id,name']),
+            'roles' => $this->activeRoles(),
         ]);
     }
 
@@ -98,5 +103,13 @@ class UserController extends Controller
             'status' => $request->input('status'),
             'user_type_id' => $request->input('user_type_id'),
         ]);
+    }
+
+    private function activeRoles()
+    {
+        return Role::query()
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name']);
     }
 }

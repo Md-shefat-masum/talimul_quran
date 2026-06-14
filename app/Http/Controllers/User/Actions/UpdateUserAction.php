@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User\Actions;
 
 use App\Models\User;
 use App\Services\FileManager\FileManagerUsageService;
+use App\Support\Sidebar\SidebarMenuBuilder;
 
 class UpdateUserAction
 {
@@ -79,6 +80,8 @@ class UpdateUserAction
         $this->trackDocumentUsage($user);
         $this->trackProfileImageUsage($user);
         $this->trackAdditionalImageUsage($user);
+        $user->roles()->sync($data['roles'] ?? []);
+        SidebarMenuBuilder::forgetForUser($user);
 
         return $user;
     }

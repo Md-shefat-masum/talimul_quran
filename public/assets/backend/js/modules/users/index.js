@@ -25,6 +25,7 @@
     function buildUserDetailsHtml(user) {
         var statusLabel = Number(user.status) === 1 ? 'Active' : 'Inactive';
         var userType = user.user_type_text || 'Not assigned';
+        var roles = (user.role_names || []).join(', ') || 'No role';
         var phone = user.phone || 'Not provided';
         var avatar = user.avatar_url || 'Not selected';
 
@@ -34,6 +35,7 @@
             '<div><span>Phone</span><strong>' + escapeHtml(phone) + '</strong></div>' +
             '<div><span>Avatar</span><strong>' + escapeHtml(avatar) + '</strong></div>' +
             '<div><span>User Type</span><strong>' + escapeHtml(userType) + '</strong></div>' +
+            '<div><span>Roles</span><strong>' + escapeHtml(roles) + '</strong></div>' +
             '<div><span>Status</span><strong>' + escapeHtml(statusLabel) + '</strong></div>' +
             '</div>';
     }
@@ -61,15 +63,16 @@
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
         dom: 'rt<"user-table-footer"ip>',
-        order: [[6, 'desc']],
+        order: [[7, 'desc']],
         columnDefs: [
-            {responsivePriority: 1, targets: 7},
+            {responsivePriority: 1, targets: 8},
             {responsivePriority: 2, targets: 1},
-            {responsivePriority: 3, targets: 5},
+            {responsivePriority: 3, targets: 6},
             {responsivePriority: 4, targets: 2},
-            {responsivePriority: 5, targets: 6},
+            {responsivePriority: 5, targets: 7},
             {responsivePriority: 20, targets: 4},
-            {responsivePriority: 30, targets: 3}
+            {responsivePriority: 30, targets: 3},
+            {responsivePriority: 40, targets: 5}
         ],
         ajax: function (requestData, callback) {
             requestData.filters = {
@@ -113,6 +116,7 @@
             {data: 'email', name: 'email', render: escapeHtml},
             {data: 'phone', name: 'phone', render: escapeHtml},
             {data: 'user_type', name: 'user_type', orderable: false, render: escapeHtml},
+            {data: 'roles', name: 'roles', orderable: false, render: escapeHtml},
             {
                 data: 'status_label',
                 name: 'status',
@@ -167,7 +171,7 @@
 
     function buildColumnMenu() {
         var menu = document.getElementById('userColumnsMenu');
-        var labels = ['#', 'User', 'Email', 'Phone', 'User Type', 'Status', 'Created', 'Actions'];
+        var labels = ['#', 'User', 'Email', 'Phone', 'User Type', 'Roles', 'Status', 'Created', 'Actions'];
 
         labels.forEach(function (label, index) {
             var wrapper = document.createElement('label');

@@ -93,6 +93,27 @@ class FileManagerService
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function tree(string $parent = ''): array
+    {
+        $folder = $this->folderFromPath($parent);
+        $folders = MediaFolder::query()
+            ->active()
+            ->where('parent_id', $folder?->id ?? 0)
+            ->withCount([
+                'children as children_count' => fn ($builder) => $builder->active(),
+            ])
+            ->orderBy('name')
+            ->get();
+
+        return $folders
+            ->map(fn (MediaFolder $mediaFolder): array => $this->buildTreeDirectoryItem($mediaFolder))
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function uploadPhoto(UploadedFile $file, string $path = '', ?string $name = null, string $conflictStrategy = 'rename'): array
@@ -621,6 +642,28 @@ class FileManagerService
             'is_image' => false,
             'permission_overrides' => $folder->permission_overrides ?: [],
             'usage' => $this->usageService->summary((string) $folder->id, 'directory', 3),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildTreeDirectoryItem(MediaFolder $folder): array
+    {
+        $path = $this->folderPath($folder);
+        $childrenCount = (int) ($folder->children_count ?? 0);
+
+        return [
+            'id' => $folder->id,
+            'folder_id' => $folder->id,
+            'name' => $folder->name ?: basename($path),
+            'path' => $path,
+            'display_path' => $this->folderDisplayPath($folder),
+            'type' => 'directory',
+            'children' => [],
+            'children_count' => $childrenCount,
+            'has_children' => $childrenCount > 0,
+            'children_loaded' => false,
         ];
     }
 

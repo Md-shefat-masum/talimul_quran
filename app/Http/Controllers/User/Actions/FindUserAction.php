@@ -8,7 +8,7 @@ class FindUserAction
 {
     public function execute(User $user): array
     {
-        $user->loadMissing('userType:id,name');
+        $user->loadMissing(['userType:id,name', 'roles:id,name']);
 
         return [
             'id' => $user->id,
@@ -25,6 +25,8 @@ class FindUserAction
             'document_paths' => $user->document_paths ?: [],
             'user_type_id' => $user->user_type_id,
             'user_type_text' => $user->userType?->name,
+            'role_ids' => $user->roles->pluck('id')->values()->all(),
+            'role_names' => $user->roles->pluck('name')->values()->all(),
             'status' => $user->status ? 1 : 0,
         ];
     }

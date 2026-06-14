@@ -40,6 +40,11 @@ class UpdateUserRequest extends FormRequest
                 'integer',
                 Rule::exists('user_types', 'id')->where('status', true),
             ],
+            'roles' => ['nullable', 'array'],
+            'roles.*' => [
+                'integer',
+                Rule::exists('roles', 'id')->where('status', true),
+            ],
             'status' => ['required', 'boolean'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];

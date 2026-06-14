@@ -1,3 +1,10 @@
+@php
+    $navbarUser = auth()->user();
+    $navbarUser?->loadMissing('roles:id,name,slug');
+    $navbarProfileImage = $navbarUser?->profileImageUrl() ?: asset('assets/backend/images/default-avatar.svg');
+    $navbarPrimaryRole = $navbarUser?->roles?->first()?->name ?? 'No Role';
+@endphp
+
 <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
         <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
@@ -28,26 +35,36 @@
             <li class="nav-item nav-profile dropdown">
                 <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                     <div class="nav-profile-img">
-                        <img src="{{ asset('assets/backend/images/default-avatar.svg') }}" alt="User avatar">
+                        <img src="{{ $navbarProfileImage }}" alt="User avatar">
                     </div>
                     <div class="nav-profile-text">
-                        <p class="mb-1 text-black">{{ auth()->user()?->name ?? 'Admin User' }}</p>
+                        <p class="mb-1 text-black">{{ $navbarUser?->name ?? 'Admin User' }}</p>
+                        <small class="text-muted d-block">{{ $navbarPrimaryRole }}</small>
                     </div>
                 </a>
                 <div class="dropdown-menu navbar-dropdown dropdown-menu-end p-0 border-0 font-size-sm" aria-labelledby="profileDropdown">
                     <div class="p-3 text-center bg-primary">
-                        <img class="img-avatar img-avatar48 img-avatar-thumb" src="{{ asset('assets/backend/images/default-avatar.svg') }}" alt="User avatar">
+                        <img class="img-avatar img-avatar48 img-avatar-thumb" src="{{ $navbarProfileImage }}" alt="User avatar">
+                        <p class="text-white mb-0 mt-2">{{ $navbarUser?->name ?? 'Admin User' }}</p>
+                        <small class="text-white-50">{{ $navbarUser?->email }}</small>
                     </div>
                     <div class="p-2">
                         <h5 class="dropdown-header text-uppercase ps-2 text-dark">User Options</h5>
-                        <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="#">
+                        <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="{{ route('backend.profile.edit') }}">
                             <span>Profile</span>
                             <i class="mdi mdi-account-outline ms-1"></i>
                         </a>
-                        <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="#">
+                        <a class="dropdown-item py-1 d-flex align-items-center justify-content-between" href="{{ route('backend.profile.edit') }}">
                             <span>Settings</span>
                             <i class="mdi mdi-cog-outline ms-1"></i>
                         </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item py-1 d-flex align-items-center justify-content-between">
+                                <span>Logout</span>
+                                <i class="mdi mdi-logout ms-1"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </li>

@@ -40,6 +40,20 @@
             });
         },
 
+        tree: function (parent) {
+            parent = parent || {};
+
+            return window.appAxios.get(window.FileManagerConfig.endpoints.tree, {
+                params: params({
+                    path: parent.path,
+                    folder_id: parent.folderId
+                })
+            })
+                .then(function (response) {
+                    return response.data.data;
+                });
+        },
+
         uploadPhoto: function (payload) {
             var formData = new FormData();
             formData.append('photo', payload.file);

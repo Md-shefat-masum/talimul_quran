@@ -5,6 +5,7 @@
     $submitText = $submitText ?? ($mode === 'edit' ? 'Update User' : 'Save User');
     $selectedTypeId = old('user_type_id', $user?->user_type_id);
     $selectedTypeText = old('user_type_text', $user?->userType?->name);
+    $selectedRoleIds = collect(old('roles', $user?->roles?->pluck('id')->all() ?? []))->map(fn ($id) => (int) $id)->all();
     $selectedStatus = (string) old('status', $user?->status ?? 1);
     $profileImagePath = old('profile_image_path', $user?->profile_image_path ?? $user?->avatar_path);
     $profileImageUrl = old('profile_image_url', $user?->profileImageUrl() ?? $user?->avatar_url);
@@ -89,6 +90,18 @@
                 <option value="0" {{ $selectedStatus === '0' ? 'selected' : '' }}>Inactive</option>
             </select>
             <div class="invalid-feedback" data-error-for="status"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label" for="{{ $formId }}-roles">Roles</label>
+            <select class="form-select" id="{{ $formId }}-roles" name="roles[]" multiple>
+                @foreach(($roles ?? []) as $role)
+                    <option value="{{ $role->id }}" @selected(in_array($role->id, $selectedRoleIds, true))>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+            <div class="invalid-feedback d-block" data-error-for="roles"></div>
         </div>
 
         <div class="col-md-6 d-flex align-items-end">

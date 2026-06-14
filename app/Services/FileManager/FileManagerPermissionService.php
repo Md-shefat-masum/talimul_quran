@@ -70,6 +70,10 @@ class FileManagerPermissionService
 
     private function allowsByGate(Authenticatable $user, string $ability): ?bool
     {
+        if ($this->hasNoAssignedRoles($user)) {
+            return null;
+        }
+
         foreach ($this->permissionNames($ability) as $permissionName) {
             if (Gate::has($permissionName)) {
                 return Gate::forUser($user)->allows($permissionName);
@@ -77,6 +81,19 @@ class FileManagerPermissionService
         }
 
         return null;
+    }
+
+    private function hasNoAssignedRoles(Authenticatable $user): bool
+    {
+        if (! method_exists($user, 'roles')) {
+            return false;
+        }
+
+        try {
+            return ! $user->roles()->active()->exists();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function allowsByUserType(Authenticatable $user, string $ability): ?bool
