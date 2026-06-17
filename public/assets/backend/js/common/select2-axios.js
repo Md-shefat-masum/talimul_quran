@@ -5,14 +5,48 @@
         throw new Error('jQuery must be loaded before select2-axios.js');
     }
 
-    window.initAxiosSelect2 = function (element, options) {
+    function baseConfig(element, options) {
         var $element = $(element);
         var dropdownParent = $element.closest('.modal');
         var config = {
             width: '100%',
             allowClear: Boolean(options.allowClear),
-            placeholder: options.placeholder || 'Select an option',
-            ajax: {
+            placeholder: options.placeholder || 'Select an option'
+        };
+
+        if (Object.prototype.hasOwnProperty.call(options, 'closeOnSelect')) {
+            config.closeOnSelect = Boolean(options.closeOnSelect);
+        }
+
+        if (dropdownParent.length) {
+            config.dropdownParent = dropdownParent;
+        }
+
+        return config;
+    }
+
+    function mountSelect2(element, config) {
+        var $element = $(element);
+
+        if ($element.hasClass('select2-hidden-accessible')) {
+            $element.select2('destroy');
+        }
+
+        $element.select2(config);
+    }
+
+    window.appSelect2 = {
+        static: function (element, options) {
+            options = options || {};
+            mountSelect2(element, baseConfig(element, options));
+        },
+
+        ajax: function (element, options) {
+            options = options || {};
+
+            var config = baseConfig(element, options);
+
+            config.ajax = {
                 url: options.url,
                 delay: 250,
                 data: function (params) {
@@ -44,17 +78,13 @@
                 processResults: function (data) {
                     return data;
                 }
-            }
-        };
+            };
 
-        if (dropdownParent.length) {
-            config.dropdownParent = dropdownParent;
+            mountSelect2(element, config);
         }
+    };
 
-        if ($element.hasClass('select2-hidden-accessible')) {
-            $element.select2('destroy');
-        }
-
-        $element.select2(config);
+    window.initAxiosSelect2 = function (element, options) {
+        window.appSelect2.ajax(element, options || {});
     };
 })(window, window.jQuery);

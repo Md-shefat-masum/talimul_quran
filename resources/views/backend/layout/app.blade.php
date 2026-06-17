@@ -44,6 +44,8 @@
     <file-manager></file-manager>
 @endunless
 
+@include('backend.components.flash-alert')
+
 @include('backend.layout.includes.scripts')
 @stack('scripts')
 </body>

@@ -15,10 +15,14 @@
             </h3>
             <p class="user-management-hero__subtitle">Assign permissions from the fixed manual permission registry.</p>
         </div>
-        <a href="{{ route('backend.roles.index') }}" class="btn btn-outline-primary btn-sm mt-3 mt-md-0">
-            <i class="mdi mdi-arrow-left me-1"></i>
+        <x-backend.action-button
+            variant="outline-primary"
+            :href="route('backend.roles.index')"
+            icon="mdi mdi-arrow-left"
+            class="mt-3 mt-md-0"
+        >
             Back to Roles
-        </a>
+        </x-backend.action-button>
     </div>
 
     @include('backend.pages.roles.partials.form', [

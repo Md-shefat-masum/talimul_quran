@@ -4,32 +4,21 @@
 
 @section('content')
 <div class="user-management-shell">
-    <div class="user-index-topbar">
-        <div class="user-index-heading">
-            <span class="user-index-heading__icon bg-gradient-primary text-white">
-                <i class="mdi mdi-shield-account-outline"></i>
-            </span>
-            <div>
-                <p class="user-index-heading__kicker">Access Control</p>
-                <h3 class="user-index-heading__title">Role Management</h3>
-            </div>
-        </div>
-
-        @can('roles.create')
-            <a href="{{ route('backend.roles.create') }}" class="btn btn-gradient-primary btn-sm">
-                <i class="mdi mdi-plus me-1"></i>
+    <x-backend.page-header
+        kicker="Access Control"
+        title="Role Management"
+        icon="mdi mdi-shield-account-outline"
+    >
+        <x-slot:actions>
+            <x-backend.action-button
+                ability="roles.create"
+                :href="route('backend.roles.create')"
+                icon="mdi mdi-plus"
+            >
                 Create Role
-            </a>
-        @endcan
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+            </x-backend.action-button>
+        </x-slot:actions>
+    </x-backend.page-header>
 
     <div class="card user-management-card">
         <div class="card-body">
@@ -48,35 +37,52 @@
                     @forelse($roles as $role)
                         <tr>
                             <td>
-                                <div class="fw-semibold text-dark">{{ $role->name }}</div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-semibold text-dark">{{ $role->name }}</span>
+                                    @if($role->is_system)
+                                        <x-backend.status-badge variant="system" />
+                                    @endif
+                                </div>
                                 <div class="small text-muted">{{ $role->slug }}</div>
                             </td>
                             <td>{{ count($role->permissions ?: []) }}</td>
                             <td>{{ $role->users_count }}</td>
                             <td>
-                                <span class="user-status-badge {{ $role->status ? 'user-status-badge--active' : 'user-status-badge--inactive' }}">
-                                    {{ $role->status ? 'Active' : 'Inactive' }}
-                                </span>
+                                <x-backend.status-badge :status="$role->status" />
                             </td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-2">
-                                    @can('roles.update')
-                                        <a href="{{ route('backend.roles.edit', $role) }}" class="btn btn-sm btn-outline-primary">
-                                            <i class="mdi mdi-pencil-outline me-1"></i>
-                                            Edit
-                                        </a>
-                                    @endcan
+                                    <x-backend.action-button
+                                        ability="roles.update"
+                                        variant="outline-primary"
+                                        :href="route('backend.roles.edit', $role)"
+                                        icon="mdi mdi-pencil-outline"
+                                    >
+                                        Edit
+                                    </x-backend.action-button>
 
-                                    @can('roles.delete')
-                                        <form method="POST" action="{{ route('backend.roles.destroy', $role) }}" onsubmit="return confirm('Delete this role?')">
+                                    @if(auth()->user()?->can('roles.delete'))
+                                        <form
+                                            method="POST"
+                                            action="{{ route('backend.roles.destroy', $role) }}"
+                                            data-confirm-submit
+                                            data-confirm-title="Delete this role?"
+                                            data-confirm-text="{{ $role->name }} will be permanently removed if it is not assigned to any user."
+                                            data-confirm-button-text="Yes, delete role"
+                                        >
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" @disabled($role->is_system || $role->users_count > 0)>
-                                                <i class="mdi mdi-delete-outline me-1"></i>
+                                            <x-backend.action-button
+                                                as="button"
+                                                type="submit"
+                                                variant="danger"
+                                                icon="mdi mdi-delete-outline"
+                                                :disabled="$role->is_system || $role->users_count > 0"
+                                            >
                                                 Delete
-                                            </button>
+                                            </x-backend.action-button>
                                         </form>
-                                    @endcan
+                                    @endif
                                 </div>
                             </td>
                         </tr>

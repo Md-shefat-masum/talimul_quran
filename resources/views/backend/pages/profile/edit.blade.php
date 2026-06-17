@@ -10,26 +10,17 @@
 @endphp
 
 <div class="user-management-shell">
-    <div class="user-management-hero user-management-hero--compact">
-        <div>
-            <div class="user-management-hero__eyebrow">Account / Profile</div>
-            <h3 class="page-title">
-                <span class="page-title-icon bg-gradient-primary text-white me-2">
-                    <i class="mdi mdi-account-circle-outline"></i>
-                </span>
-                My Profile
-            </h3>
-            <p class="user-management-hero__subtitle">Keep your personal account details and profile image up to date.</p>
-        </div>
-        <span class="badge user-form-page-badge mt-3 mt-md-0">{{ $primaryRole }}</span>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success d-flex align-items-center gap-2">
-            <i class="mdi mdi-check-circle-outline"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
+    <x-backend.page-header
+        variant="hero"
+        kicker="Account / Profile"
+        title="My Profile"
+        subtitle="Keep your personal account details and profile image up to date."
+        icon="mdi mdi-account-circle-outline"
+    >
+        <x-slot:actions>
+            <span class="badge user-form-page-badge mt-3 mt-md-0">{{ $primaryRole }}</span>
+        </x-slot:actions>
+    </x-backend.page-header>
 
     <div class="row g-4">
         <div class="col-12 col-xl-4">
@@ -46,17 +37,12 @@
         </div>
 
         <div class="col-12 col-xl-8">
-            <div class="card user-management-card user-form-card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-                        <div>
-                            <h4 class="user-form-card__heading mb-1">Profile Details</h4>
-                            <p class="text-muted small mb-0">Leave password blank to keep your current password.</p>
-                        </div>
-                        <span class="badge user-form-page-badge">Self Service</span>
-                    </div>
-
-                    <form method="POST" action="{{ route('backend.profile.update') }}" class="user-form-component">
+            <x-backend.form-card
+                title="Profile Details"
+                subtitle="Leave password blank to keep your current password."
+                badge="Self Service"
+            >
+                <form method="POST" action="{{ route('backend.profile.update') }}" class="user-form-component">
                         @csrf
                         @method('PATCH')
 
@@ -165,9 +151,8 @@
                                 Update Profile
                             </button>
                         </div>
-                    </form>
-                </div>
-            </div>
+                </form>
+            </x-backend.form-card>
         </div>
     </div>
 </div>

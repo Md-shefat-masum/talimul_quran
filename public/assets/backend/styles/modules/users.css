@@ -89,6 +89,13 @@
     line-height: 1.2;
 }
 
+.user-index-heading__subtitle {
+    margin: 0.18rem 0 0;
+    color: #6f8481;
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
 .user-summary-strip {
     min-width: 0;
     display: grid;
@@ -752,6 +759,26 @@
 .user-status-badge--inactive {
     color: #ae6817;
     background: #fff0cf;
+}
+
+.user-status-badge--system {
+    color: #2259a8;
+    background: #e6efff;
+}
+
+.user-status-badge--info {
+    color: #08766f;
+    background: #daf3f0;
+}
+
+.user-status-badge--danger {
+    color: #b4232f;
+    background: #ffe3e7;
+}
+
+.user-status-badge--muted {
+    color: #64748b;
+    background: #eef2f7;
 }
 
 .user-row-actions {
