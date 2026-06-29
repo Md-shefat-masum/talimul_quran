@@ -92,10 +92,37 @@
         setOpen(item, shouldOpen);
     });
 
+    function setMobileSidebarOpen(open) {
+        root.classList.toggle('active', open);
+        document.body.classList.toggle('sidebar-mobile-open', open);
+    }
+
+    function isMobileSidebar() {
+        return window.matchMedia('(max-width: 991px)').matches;
+    }
+
     document.querySelectorAll('[data-toggle="offcanvas"]').forEach(function (button) {
         button.addEventListener('click', function () {
-            root.classList.toggle('active');
+            setMobileSidebarOpen(!root.classList.contains('active'));
         });
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!isMobileSidebar() || !root.classList.contains('active')) {
+            return;
+        }
+
+        if (root.contains(event.target) || event.target.closest('[data-toggle="offcanvas"]')) {
+            return;
+        }
+
+        setMobileSidebarOpen(false);
+    });
+
+    window.addEventListener('resize', function () {
+        if (!isMobileSidebar()) {
+            setMobileSidebarOpen(false);
+        }
     });
 
     ensureActiveChainOpen();
